@@ -189,7 +189,7 @@ export const Hero = () => {
                   </h3>
                   <button
                     onClick={closeModal}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-white hover:text-gray-700"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -438,7 +438,7 @@ export const Hero = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handlePurchaseClick}
-                    className="px-8 py-3 bg-white text-gray-800 font-semibold rounded-full hover:bg-gray-200 transition duration-300"
+                    className="px-8 py-3 bg-white text-white font-semibold rounded-full hover:bg-gray-200 transition duration-300"
                   >
                     Purchase Now!
                   </motion.button>
@@ -478,7 +478,7 @@ export const Hero = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleDiscoverClick(item.title)}
-                        className="px-6 py-2 bg-white text-gray-800 font-semibold rounded-full transition duration-300 text-sm"
+                        className="px-6 py-2 bg-white text-white font-semibold rounded-full transition duration-300 text-sm"
                       >
                         Discover More
                       </motion.button>

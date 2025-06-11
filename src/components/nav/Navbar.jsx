@@ -16,6 +16,8 @@ import {
   Security,
   Info,
   ContactEmergency,
+  ElectricalServices,
+  ContactPage,
 } from "@mui/icons-material";
 import logo from "../../assets/images/logo.png";
 
@@ -42,7 +44,7 @@ export const Navbar = () => {
     {
       label: "Servises",
       path: "/78318",
-      icon: <Security className="size-6 text-white" />,
+      icon: <ElectricalServices className="size-6 text-white" />,
     },
     {
       label: "About",
@@ -57,7 +59,7 @@ export const Navbar = () => {
     {
       label: "Contacts",
       path: "/63819",
-      icon: <ContactEmergency className="size-6 text-white" />,
+      icon: <ContactPage className="size-6 text-white" />,
     },
     {
       label: "Dashboard",
@@ -301,7 +303,7 @@ export const Navbar = () => {
                       <Link to={item.path}>
                         <button
                           key={item.label}
-                          className="flex items-center px-4 py-2 rounded hover:bg-blue-800 transition-colors"
+                          className="w-full flex items-center px-4 py-2 rounded hover:bg-blue-800 transition-colors"
                         >
                           {item.icon}
                           <span className="ml-2">{item.label}</span>

@@ -37,7 +37,10 @@ export const WomensLatest = () => {
     address: '',
     paymentMethod: 'credit-card'
   });
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(() => {
+    const savedWishlist = typeof window !== 'undefined' ? localStorage.getItem('wishlist') : null;
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
+  });
 
   // Refs
   const sliderRef = useRef(null);
@@ -260,14 +263,30 @@ export const WomensLatest = () => {
     resumeAutoSlide();
   };
 
-  // Toggle wishlist
-  const toggleWishlist = (productId) => {
-    if (wishlist.includes(productId)) {
-      setWishlist(wishlist.filter((id) => id !== productId));
-    } else {
-      setWishlist([...wishlist, productId]);
+
+  // Function to update both state and localStorage
+  const updateWishlist = (newWishlist) => {
+    setWishlist(newWishlist);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
     }
   };
+
+  // Toggle wishlist item
+  const toggleWishlist = (productId) => {
+    const newWishlist = wishlist.includes(productId)
+      ? wishlist.filter((id) => id !== productId)
+      : [...wishlist, productId];
+    
+    updateWishlist(newWishlist);
+    
+    toast.success(
+      wishlist.includes(productId)
+        ? "Removed from wishlist"
+        : "Added to wishlist"
+    );
+  };
+
 
   // Calculate estimated delivery date (3-5 business days from now)
   const calculateDeliveryDate = () => {
@@ -555,156 +574,15 @@ export const WomensLatest = () => {
           </AnimatePresence>
 
           {/* Payment Modal */}
-          <AnimatePresence>
-            {showPayment && (
-              <motion.div
-                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowPayment(false)}
-              >
-                <motion.div
-                  className="bg-white rounded-xl max-w-md w-full p-6"
-                  initial={{ scale: 0.9, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
-                  exit={{ scale: 0.9, y: 20 }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Payment Information
-                    </h3>
-                    <button
-                      onClick={() => setShowPayment(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <Close />
-                    </button>
-                  </div>
-
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    processCheckout();
-                  }}>
-                    <div className="space-y-4 mb-6">
-                      <div>
-                        <label className="block text-gray-700 mb-1">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={checkoutForm.name}
-                          onChange={handleFormChange}
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 mb-1">
-                          Email *
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={checkoutForm.email}
-                          onChange={handleFormChange}
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 mb-1">
-                          Shipping Address *
-                        </label>
-                        <textarea
-                          name="address"
-                          value={checkoutForm.address}
-                          onChange={handleFormChange}
-                          rows={3}
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 mb-1">
-                          Payment Method *
-                        </label>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <input
-                              id="credit-card"
-                              name="paymentMethod"
-                              type="radio"
-                              value="credit-card"
-                              checked={checkoutForm.paymentMethod === 'credit-card'}
-                              onChange={handleFormChange}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                            />
-                            <label htmlFor="credit-card" className="ml-2 block text-sm text-gray-700">
-                              Credit Card
-                            </label>
-                          </div>
-                          <div className="flex items-center">
-                            <input
-                              id="paypal"
-                              name="paymentMethod"
-                              type="radio"
-                              value="paypal"
-                              checked={checkoutForm.paymentMethod === 'paypal'}
-                              onChange={handleFormChange}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                            />
-                            <label htmlFor="paypal" className="ml-2 block text-sm text-gray-700">
-                              PayPal
-                            </label>
-                          </div>
-                          <div className="flex items-center">
-                            <input
-                              id="bank-transfer"
-                              name="paymentMethod"
-                              type="radio"
-                              value="bank-transfer"
-                              checked={checkoutForm.paymentMethod === 'bank-transfer'}
-                              onChange={handleFormChange}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                            />
-                            <label htmlFor="bank-transfer" className="ml-2 block text-sm text-gray-700">
-                              Bank Transfer
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isProcessing}
-                      className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
-                        isProcessing ? 'opacity-70 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          <Payment />
-                          Pay ${calculateTotal().toFixed(2)}
-                        </>
-                      )}
-                    </button>
-                  </form>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <PaymentModal 
+            showPayment={showPayment} 
+            setShowPayment={setShowPayment}
+            checkoutForm={checkoutForm}
+            handleFormChange={handleFormChange}
+            calculateTotal={calculateTotal}
+            isProcessing={isProcessing}
+            processCheckout={processCheckout}
+          />
 
           {/* Delivery Estimate Modal */}
           <AnimatePresence>
@@ -755,9 +633,6 @@ export const WomensLatest = () => {
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Cart Button */}
-      
         </div>
       </section>
     </>
@@ -961,3 +836,216 @@ const ProductModal = ({
     </motion.div>
   </motion.div>
 );
+
+// Payment Modal with slide-up animation
+const PaymentModal = ({
+  showPayment,
+  setShowPayment,
+  checkoutForm,
+  handleFormChange,
+  calculateTotal,
+  isProcessing,
+  processCheckout
+}) => {
+  return (
+    <AnimatePresence>
+      {showPayment && (
+        <motion.div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center p-4 z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowPayment(false)}
+        >
+          <motion.div
+            className="bg-white rounded-t-xl w-full max-w-md"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Checkout
+                </h3>
+                <button
+                  onClick={() => setShowPayment(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Close />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                processCheckout();
+              }}>
+                {/* Customer Information */}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="John Doe"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={checkoutForm.name}
+                      onChange={handleFormChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="your@email.com"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={checkoutForm.email}
+                      onChange={handleFormChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">
+                      Shipping Address
+                    </label>
+                    <textarea
+                      name="address"
+                      placeholder="123 Main St, City, Country"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={checkoutForm.address}
+                      onChange={handleFormChange}
+                      required
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                {/* Payment Method Selection */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="credit-card"
+                        checked={checkoutForm.paymentMethod === 'credit-card'}
+                        onChange={handleFormChange}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>Credit Card</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="paypal"
+                        checked={checkoutForm.paymentMethod === 'paypal'}
+                        onChange={handleFormChange}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>PayPal</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="bank-transfer"
+                        checked={checkoutForm.paymentMethod === 'bank-transfer'}
+                        onChange={handleFormChange}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>Bank Transfer</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Credit Card Fields (shown only when credit-card is selected) */}
+                {checkoutForm.paymentMethod === 'credit-card' && (
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="block text-gray-700 mb-1">
+                        Card Number
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="1234 5678 9012 3456"
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-gray-700 mb-1">
+                          Expiry Date
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="MM/YY"
+                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-1">CVV</label>
+                        <input
+                          type="text"
+                          placeholder="123"
+                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-1">
+                        Name on Card
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="border-t pt-4 mb-6">
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
+                    isProcessing ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isProcessing ? (
+                    'Processing...'
+                  ) : (
+                    <>
+                      <Payment />
+                      Complete Payment
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};

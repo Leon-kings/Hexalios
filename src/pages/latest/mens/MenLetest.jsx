@@ -37,7 +37,10 @@ export const MensLatest = () => {
     address: '',
     paymentMethod: 'credit-card'
   });
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(() => {
+    const savedWishlist = typeof window !== 'undefined' ? localStorage.getItem('wishlist') : null;
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
+  });
 
   // Refs
   const sliderRef = useRef(null);
@@ -260,13 +263,27 @@ export const MensLatest = () => {
     resumeAutoSlide();
   };
 
-  // Toggle wishlist
-  const toggleWishlist = (productId) => {
-    if (wishlist.includes(productId)) {
-      setWishlist(wishlist.filter((id) => id !== productId));
-    } else {
-      setWishlist([...wishlist, productId]);
+  // Function to update both state and localStorage
+  const updateWishlist = (newWishlist) => {
+    setWishlist(newWishlist);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
     }
+  };
+
+  // Toggle wishlist item
+  const toggleWishlist = (productId) => {
+    const newWishlist = wishlist.includes(productId)
+      ? wishlist.filter((id) => id !== productId)
+      : [...wishlist, productId];
+    
+    updateWishlist(newWishlist);
+    
+    toast.success(
+      wishlist.includes(productId)
+        ? "Removed from wishlist"
+        : "Added to wishlist"
+    );
   };
 
   // Calculate estimated delivery date (3-5 business days from now)

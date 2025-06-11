@@ -17,6 +17,7 @@ import {
   QuestionAnswer,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import logo from '../../assets/images/white-logo.png'
 
 export const Footer = () => {
   return (
@@ -33,8 +34,8 @@ export const Footer = () => {
             >
               <div className="mb-4">
                 <img
-                  src="https://via.placeholder.com/150x50?text=HexaShop"
-                  alt="HexaShop Ecommerce"
+                  src={logo}
+                  alt=""
                   className="h-10"
                 />
               </div>
@@ -51,20 +52,17 @@ export const Footer = () => {
                 </li>
                 <li className="flex items-start">
                   <Email className="text-gray-400 mr-3 mt-1 flex-shrink-0" />
-                  <a
-                    href="mailto:hexashop@company.com"
+                  <Link
+                    to={"mailto:hexashop@company.com"}
                     className="hover:text-white transition-colors"
                   >
                     hexashop@company.com
-                  </a>
+                  </Link>
                 </li>
                 <li className="flex items-start">
                   <Phone className="text-gray-400 mr-3 mt-1 flex-shrink-0" />
-                  <a
-                    href="tel:0100200340"
-                    className="hover:text-white transition-colors"
-                  >
-                    010-020-0340
+                  <a className="hover:text-white transition-colors">
+                    250-7879-445-77
                   </a>
                 </li>
               </ul>
@@ -83,7 +81,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 <li>
                   <Link
-                    to="/shop/men"
+                    to={"/"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
@@ -92,7 +90,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/shop/women"
+                    to={"/"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
@@ -101,7 +99,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/shop/kids"
+                    to={"/"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
@@ -124,7 +122,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 <li>
                   <Link
-                    to="/"
+                    to={"/"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <Home className="text-gray-400 mr-2 text-sm" />
@@ -133,7 +131,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/about"
+                    to={"/68329"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <Info className="text-gray-400 mr-2 text-sm" />
@@ -142,7 +140,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/help"
+                    to={"/63819"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <Help className="text-gray-400 mr-2 text-sm" />
@@ -151,7 +149,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/contact"
+                    to={"/63819"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <ContactMail className="text-gray-400 mr-2 text-sm" />
@@ -174,7 +172,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 <li>
                   <Link
-                    to="/help"
+                    to={"/63819"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <Help className="text-gray-400 mr-2 text-sm" />
@@ -183,7 +181,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/faq"
+                    to={"/83934/3281"}
                     className="hover:text-white transition-colors flex items-center"
                   >
                     <QuestionAnswer className="text-gray-400 mr-2 text-sm" />
@@ -191,19 +189,13 @@ export const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/shipping"
-                    className="hover:text-white transition-colors flex items-center"
-                  >
+                  <Link className="hover:text-white transition-colors flex items-center">
                     <LocalShipping className="text-gray-400 mr-2 text-sm" />
                     Shipping
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/tracking"
-                    className="hover:text-white transition-colors flex items-center"
-                  >
+                  <Link className="hover:text-white transition-colors flex items-center">
                     <LocalShipping className="text-gray-400 mr-2 text-sm" />
                     Tracking ID
                   </Link>

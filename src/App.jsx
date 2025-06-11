@@ -13,6 +13,7 @@ import { About } from "./pages/about/About";
 import { Contact } from "./pages/contacts/Contacts";
 import { Testimony } from "./pages/testimony/Testimony";
 import { Login } from "./pages/login/Login";
+import { FAQ } from "./components/faq/FAQ";
 
 // Private Route component
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/63819" element={<Contact />} />
         <Route path="/89213" element={<Testimony />} />
         <Route path="/00832/7282" element={<Login />} />
+        <Route path="/83934/3281" element={<FAQ />} />
         <Route
           path="/894202"
           element={
