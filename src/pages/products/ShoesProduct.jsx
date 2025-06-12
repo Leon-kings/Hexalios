@@ -332,12 +332,12 @@ export const ShoesProducts = () => {
         <ToastContainer />
 
         {/* Hero Section */}
-        <div className="relative bg-gray-900 text-white">
-          <div className="absolute inset-0 bg-black opacity-50"></div>
-          <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+        <div className="relative bg-indigo-700 rounded-2xl text-white">
+          <div className="absolute bg-black inset-0 opacity-50"></div>
+          <div className="relative max-w-7xl mx-auto py-10 px-4 sm:py-32 sm:px-6 lg:px-8 text-center">
+            <h3 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               Step Into Style
-            </h1>
+            </h3>
             <p className="mt-6 text-xl max-w-3xl mx-auto">
               Discover the perfect pair for every occasion in our premium shoe
               collection
@@ -346,7 +346,7 @@ export const ShoesProducts = () => {
         </div>
 
         {/* Product Sections */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-12 px-4 rounded-2xl sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             {/* Tabs */}
             <div className="flex border-b mb-8">
@@ -581,7 +581,7 @@ export const ShoesProducts = () => {
                           <div key={item.id} className="flex border-b pb-4">
                             <img
                               src={item.image}
-                              alt={item.name}
+                              alt=''
                               className="w-20 h-20 object-contain bg-gray-100 rounded-md"
                               onError={(e) => {
                                 e.target.onerror = null;
@@ -590,7 +590,7 @@ export const ShoesProducts = () => {
                               }}
                             />
                             <div className="ml-4 flex-1">
-                              <h4 className="font-medium">{item.name}</h4>
+                              <h4 className="font-medium text-black">{item.name}</h4>
                               <p className="text-blue-600">
                                 ${item.price.toFixed(2)}
                               </p>
@@ -625,7 +625,7 @@ export const ShoesProducts = () => {
                                   onChange={(e) =>
                                     updateColor(item.id, e.target.value)
                                   }
-                                  className="ml-2 text-sm border rounded p-1"
+                                  className="ml-2 text-black text-sm border rounded p-1"
                                 >
                                   {item.colors.map((color) => (
                                     <option key={color} value={color}>
@@ -644,7 +644,7 @@ export const ShoesProducts = () => {
                                 >
                                   <Remove fontSize="small" />
                                 </button>
-                                <span className="mx-2">{item.quantity}</span>
+                                <span className="mx-2 text-black">{item.quantity}</span>
                                 <button
                                   onClick={() =>
                                     updateQuantity(item.id, item.quantity + 1)
@@ -727,7 +727,7 @@ export const ShoesProducts = () => {
                       <input
                         type="text"
                         placeholder="1234 5678 9012 3456"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={paymentInfo.cardNumber}
                         onChange={(e) =>
                           setPaymentInfo({
@@ -746,7 +746,7 @@ export const ShoesProducts = () => {
                         <input
                           type="text"
                           placeholder="MM/YY"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={paymentInfo.expiry}
                           onChange={(e) =>
                             setPaymentInfo({
@@ -762,7 +762,7 @@ export const ShoesProducts = () => {
                         <input
                           type="text"
                           placeholder="123"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={paymentInfo.cvv}
                           onChange={(e) =>
                             setPaymentInfo({

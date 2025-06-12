@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -171,57 +172,71 @@ export const Contact = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
+              className="bg-white p-8 rounded-xl shadow-md"
             >
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                Get in Touch
-              </h2>
+              {/* Section Header */}
+              <div className="mb-10">
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                  Get in Touch
+                </h2>
+              
+              </div>
 
-              <div className="space-y-6">
+              {/* Contact Information */}
+              <div className="space-y-6 mb-12">
                 {contactInfo.map((item, index) => (
                   <motion.div
                     key={index}
                     whileHover={{ x: 5 }}
-                    className="flex items-start"
+                    className="flex items-start group"
                   >
-                    <div className="flex-shrink-0 mt-1">{item.icon}</div>
+                    <div className="flex-shrink-0 p-2 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                      {item.icon}
+                    </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3 className="text-lg font-medium text-gray-700">
                         {item.title}
                       </h3>
-                      <a
-                        href={item.link}
+                      <Link
+                        href={item.link || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-indigo-600 transition-colors"
+                        className="text-gray-500 hover:text-indigo-600 transition-colors"
                       >
                         {item.content}
-                      </a>
+                      </Link>
                     </div>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="mt-12">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              {/* Business Hours */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
                   Business Hours
                 </h3>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex justify-between">
-                    <span>Monday - Friday</span>
-                    <span>9:00 AM - 6:00 PM</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Saturday</span>
-                    <span>10:00 AM - 4:00 PM</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Sunday</span>
-                    <span>Closed</span>
-                  </li>
+                <ul className="space-y-3">
+                  {[
+                    { day: "Monday - Friday", time: "9:00 AM - 6:00 PM" },
+                    { day: "Saturday", time: "10:00 AM - 4:00 PM" },
+                    { day: "Sunday", time: "Closed" },
+                  ].map((schedule, index) => (
+                    <li key={index} className="flex justify-between">
+                      <span className="text-gray-600">{schedule.day}</span>
+                      <span
+                        className={`font-medium ${
+                          schedule.time === "Closed"
+                            ? "text-red-500"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {schedule.time}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </motion.div>
-
             {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -248,7 +263,7 @@ export const Contact = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-2 rounded-lg border ${
+                    className={`w-full px-4 py-2 text-black rounded-lg border ${
                       errors.name ? "border-red-500" : "border-gray-300"
                     } focus:ring-indigo-500 focus:border-indigo-500`}
                     placeholder="Your name"
@@ -271,7 +286,7 @@ export const Contact = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-2 rounded-lg border ${
+                    className={`w-full px-4 text-black py-2 rounded-lg border ${
                       errors.email ? "border-red-500" : "border-gray-300"
                     } focus:ring-indigo-500 focus:border-indigo-500`}
                     placeholder="your.email@example.com"
@@ -294,7 +309,7 @@ export const Contact = () => {
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-2 rounded-lg border ${
+                    className={`w-full px-4 text-black py-2 rounded-lg border ${
                       errors.subject ? "border-red-500" : "border-gray-300"
                     } focus:ring-indigo-500 focus:border-indigo-500`}
                     placeholder="What's this about?"
@@ -319,7 +334,7 @@ export const Contact = () => {
                     rows={5}
                     value={formData.message}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-2 rounded-lg border ${
+                    className={`w-full px-4 text-black py-2 rounded-lg border ${
                       errors.message ? "border-red-500" : "border-gray-300"
                     } focus:ring-indigo-500 focus:border-indigo-500`}
                     placeholder="Your message here..."

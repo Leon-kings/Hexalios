@@ -348,7 +348,7 @@ export const ProductsPage = () => {
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className="font-semibold text-lg mb-1">
+                        <h3 className="font-semibold text-black text-lg mb-1">
                           {product.name}
                         </h3>
                         <div className="flex justify-between items-center">
@@ -466,6 +466,7 @@ export const ProductsPage = () => {
                     <>
                       <div className="space-y-4 mb-6">
                         {cart.map((item) => (
+                          
                           <div key={item.id} className="flex border-b pb-4">
                             <img
                               src={item.image}
@@ -478,7 +479,7 @@ export const ProductsPage = () => {
                               }}
                             />
                             <div className="ml-4 flex-1">
-                              <h4 className="font-medium">{item.name}</h4>
+                              <h4 className="font-medium text-gray-700">{item.name}</h4>
                               <p className="text-blue-600">
                                 ${item.price.toFixed(2)}
                               </p>
@@ -489,7 +490,7 @@ export const ProductsPage = () => {
                                   }
                                   className="text-gray-500 hover:text-gray-700"
                                 >
-                                  <Remove fontSize="small" />
+                                  <Remove fontSize="small" className="text-gray-700" />
                                 </button>
                                 <span className="mx-2">{item.quantity}</span>
                                 <button
@@ -498,7 +499,7 @@ export const ProductsPage = () => {
                                   }
                                   className="text-gray-500 hover:text-gray-700"
                                 >
-                                  <Add fontSize="small" />
+                                  <Add fontSize="small" className="text-gray-700"/>
                                 </button>
                                 <button
                                   onClick={() => removeFromCart(item.id)}
@@ -514,8 +515,8 @@ export const ProductsPage = () => {
 
                       <div className="border-t pt-4">
                         <div className="flex justify-between font-bold text-lg mb-6">
-                          <span>Total:</span>
-                          <span>${calculateTotal()}</span>
+                          <span className="text-gray-700">Total:</span>
+                          <span className="text-blue-400 font-bold">${calculateTotal()}</span>
                         </div>
                         <button
                           onClick={() => {
@@ -567,6 +568,7 @@ export const ProductsPage = () => {
 
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="space-y-4 mb-6">
+                    
                     <div>
                       <label className="block text-gray-700 mb-1">
                         Card Number
@@ -639,6 +641,7 @@ export const ProductsPage = () => {
                         required
                       />
                     </div>
+
                   </div>
 
                   <button

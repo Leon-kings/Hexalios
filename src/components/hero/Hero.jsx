@@ -1,21 +1,22 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ShoppingCart, 
-  Close, 
-  Add, 
-  Remove, 
-  Payment, 
-  LocalShipping, 
+import {
+  ShoppingCart,
+  Close,
+  Add,
+  Remove,
+  Payment,
+  LocalShipping,
   CheckCircle,
   Star,
-  StarBorder
+  StarBorder,
+  Info,
 } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { bannerItems, categories } from "../../assets/data/data";
-import side from '../../assets/images/left-banner-image.jpg';
+import side from "../../assets/images/left-banner-image.jpg";
 
 // Mock API data for category items
 const categoryItems = {
@@ -27,10 +28,11 @@ const categoryItems = {
       price: 49.99,
       sizes: ["S", "M", "L", "XL"],
       stock: 12,
-      image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Lightweight summer dress with floral pattern",
       rating: 4,
-      colors: ["Blue", "White", "Pink"]
+      colors: ["Blue", "White", "Pink"],
     },
     {
       id: 2,
@@ -39,10 +41,11 @@ const categoryItems = {
       price: 79.99,
       sizes: ["S", "M", "L"],
       stock: 8,
-      image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Classic blue denim jacket with front pockets",
       rating: 5,
-      colors: ["Blue", "Black"]
+      colors: ["Blue", "Black"],
     },
     {
       id: 3,
@@ -51,23 +54,25 @@ const categoryItems = {
       price: 59.99,
       sizes: ["28", "30", "32", "34"],
       stock: 15,
-      image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Comfortable high waist jeans with stretch fabric",
       rating: 4,
-      colors: ["Blue", "Black", "Gray"]
+      colors: ["Blue", "Black", "Gray"],
     },
     {
       id: 4,
       name: "Silk Blouse",
       type: "Top",
-      price: 65.00,
+      price: 65.0,
       sizes: ["XS", "S", "M"],
       stock: 5,
-      image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Elegant silk blouse with button front",
       rating: 3,
-      colors: ["White", "Pink"]
-    }
+      colors: ["White", "Pink"],
+    },
   ],
   men: [
     {
@@ -77,10 +82,11 @@ const categoryItems = {
       price: 199.99,
       sizes: ["38", "40", "42", "44"],
       stock: 7,
-      image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Premium wool suit with two-button jacket",
       rating: 5,
-      colors: ["Black", "Navy", "Gray"]
+      colors: ["Black", "Navy", "Gray"],
     },
     {
       id: 2,
@@ -89,22 +95,24 @@ const categoryItems = {
       price: 24.99,
       sizes: ["S", "M", "L", "XL"],
       stock: 20,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "100% cotton crew neck t-shirt",
       rating: 4,
-      colors: ["White", "Black", "Gray", "Blue"]
+      colors: ["White", "Black", "Gray", "Blue"],
     },
     {
       id: 3,
       name: "Chino Pants",
       type: "Pants",
-      price: 45.00,
+      price: 45.0,
       sizes: ["30", "32", "34", "36"],
       stock: 12,
-      image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Classic fit chino pants in multiple colors",
       rating: 4,
-      colors: ["Khaki", "Navy", "Gray"]
+      colors: ["Khaki", "Navy", "Gray"],
     },
     {
       id: 4,
@@ -113,11 +121,12 @@ const categoryItems = {
       price: 249.99,
       sizes: ["M", "L", "XL"],
       stock: 3,
-      image: "https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Genuine leather motorcycle jacket",
       rating: 5,
-      colors: ["Black", "Brown"]
-    }
+      colors: ["Black", "Brown"],
+    },
   ],
   kids: [
     {
@@ -127,10 +136,11 @@ const categoryItems = {
       price: 19.99,
       sizes: ["4", "6", "8", "10"],
       stock: 25,
-      image: "https://images.unsplash.com/photo-1583744946564-b52d01e2da64?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1583744946564-b52d01e2da64?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Fun cartoon print t-shirt for kids",
       rating: 4,
-      colors: ["Blue", "Red", "Green"]
+      colors: ["Blue", "Red", "Green"],
     },
     {
       id: 2,
@@ -139,10 +149,11 @@ const categoryItems = {
       price: 34.99,
       sizes: ["2T", "3T", "4T"],
       stock: 10,
-      image: "https://images.unsplash.com/photo-1601512444020-94430c291557?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1601512444020-94430c291557?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Adorable denim overalls with adjustable straps",
       rating: 5,
-      colors: ["Blue", "Light Blue"]
+      colors: ["Blue", "Light Blue"],
     },
     {
       id: 3,
@@ -151,10 +162,11 @@ const categoryItems = {
       price: 39.99,
       sizes: ["10", "11", "12", "13"],
       stock: 18,
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Comfortable sneakers with velcro straps",
       rating: 4,
-      colors: ["Black", "White", "Red"]
+      colors: ["Black", "White", "Red"],
     },
     {
       id: 4,
@@ -163,12 +175,13 @@ const categoryItems = {
       price: 59.99,
       sizes: ["5", "6", "7", "8"],
       stock: 6,
-      image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      image:
+        "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
       description: "Warm winter coat with hood",
       rating: 4,
-      colors: ["Red", "Blue", "Pink"]
-    }
-  ]
+      colors: ["Red", "Blue", "Pink"],
+    },
+  ],
 };
 
 export const Hero = () => {
@@ -181,10 +194,10 @@ export const Hero = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState({
-    name: '',
-    email: '',
-    address: '',
-    paymentMethod: 'credit-card'
+    name: "",
+    email: "",
+    address: "",
+    paymentMethod: "credit-card",
   });
 
   const handlePurchaseClick = () => {
@@ -211,7 +224,8 @@ export const Hero = () => {
 
     // Check if item already exists in cart
     const existingItemIndex = cart.findIndex(
-      (item) => item.id === product.id && item.selectedSize === selectedSizeToUse
+      (item) =>
+        item.id === product.id && item.selectedSize === selectedSizeToUse
     );
 
     let updatedCart;
@@ -233,7 +247,9 @@ export const Hero = () => {
     }
 
     setCart(updatedCart);
-    toast.success(`${product.name} (Size: ${selectedSizeToUse}) added to cart!`);
+    toast.success(
+      `${product.name} (Size: ${selectedSizeToUse}) added to cart!`
+    );
     setShowCart(true);
   };
 
@@ -246,7 +262,7 @@ export const Hero = () => {
 
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     const newCart = [...cart];
     newCart[index] = {
       ...newCart[index],
@@ -266,9 +282,9 @@ export const Hero = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setCheckoutForm(prev => ({
+    setCheckoutForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -277,32 +293,32 @@ export const Hero = () => {
     try {
       // Validate form
       if (!checkoutForm.name || !checkoutForm.email || !checkoutForm.address) {
-        throw new Error('Please fill in all required fields');
+        throw new Error("Please fill in all required fields");
       }
 
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       toast.success("Order placed successfully!");
       setCart([]);
       setShowPayment(false);
       setShowDelivery(true);
       setCheckoutForm({
-        name: '',
-        email: '',
-        address: '',
-        paymentMethod: 'credit-card'
+        name: "",
+        email: "",
+        address: "",
+        paymentMethod: "credit-card",
       });
     } catch (error) {
       toast.error(error.message || "Checkout failed. Please try again.");
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const calculateDeliveryDate = () => {
@@ -330,9 +346,9 @@ export const Hero = () => {
   };
 
   const shopInfo = {
-    name: "Leon Shop",
+    name: "HEXASHOP",
     address: "123 Fashion Street, Style City",
-    phone: "+1 (555) 123-4567",
+    phone: "+250 (78) 794-4577",
     email: "info@leonshop.com",
     hours: "Mon-Fri: 9AM-9PM, Sat-Sun: 10AM-8PM",
     description:
@@ -361,7 +377,8 @@ export const Hero = () => {
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    About {shopInfo.name}
+                    <Info className="text-black font-bold" /> ABOUT{" "}
+                    {shopInfo.name}
                   </h3>
                   <button
                     onClick={closeModal}
@@ -451,17 +468,7 @@ export const Hero = () => {
                     </ul>
                   </div>
 
-                  <div className="pt-4">
-                    <button
-                      onClick={() => {
-                        toast.success("We'll contact you soon!");
-                        closeModal();
-                      }}
-                      className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300"
-                    >
-                      Contact Us
-                    </button>
-                  </div>
+                  <div className="mt-4"></div>
                 </div>
               </div>
             </motion.div>
@@ -519,24 +526,32 @@ export const Hero = () => {
                         <div className="md:w-1/3 h-48 md:h-auto">
                           <img
                             src={item.image}
-                            alt={item.name}
+                            alt=""
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="p-4 md:w-2/3">
-                          <h4 className="font-semibold text-black text-lg">{item.name}</h4>
-                          <p className="text-gray-500 text-sm mb-2">{item.type}</p>
-                          <p className="text-gray-600 text-sm mb-3">{item.description}</p>
-                          
+                          <h4 className="font-semibold text-black text-lg">
+                            {item.name}
+                          </h4>
+                          <p className="text-gray-500 text-sm mb-2">
+                            {item.type}
+                          </p>
+                          <p className="text-gray-600 text-sm mb-3">
+                            {item.description}
+                          </p>
+
                           <div className="flex items-center mb-2">
-                            <div className="flex mr-2">
+                            <div className="flex mr-2 font-bold">
                               {renderStars(item.rating)}
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              item.stock > 5
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${
+                                item.stock > 5
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
                               {item.stock} in stock
                             </span>
                           </div>
@@ -546,7 +561,9 @@ export const Hero = () => {
                           </p>
 
                           <div className="mb-3">
-                            <h4 className="font-medium text-gray-900 text-sm mb-1">Colors</h4>
+                            <h4 className="font-medium text-gray-900 text-sm mb-1">
+                              Colors
+                            </h4>
                             <div className="flex space-x-1">
                               {item.colors.map((color) => (
                                 <button
@@ -554,25 +571,25 @@ export const Hero = () => {
                                   className="w-6 h-6 rounded-full border border-gray-200 focus:outline-none"
                                   style={{
                                     backgroundColor:
-                                        color.toLowerCase() === "white"
-                                          ? "#fff"
-                                          : color.toLowerCase() === "black"
-                                          ? "#000"
-                                          : color.toLowerCase() === "navy"
-                                          ? "#001f3f"
-                                          : color.toLowerCase() === "gray"
-                                          ? "#808080"
-                                          : color.toLowerCase() === "red"
-                                          ? "#ff0000"
-                                          : color.toLowerCase() === "blue"
-                                          ? "#0000ff"
-                                          : color.toLowerCase() === "green"
-                                          ? "#008000"
-                                          : color.toLowerCase() === "pink"
-                                          ? "#ffc0cb"
-                                          : color.toLowerCase() === "light blue"
-                                          ? "#add8e6"
-                                          : "#fff",
+                                      color.toLowerCase() === "white"
+                                        ? "#fff"
+                                        : color.toLowerCase() === "black"
+                                        ? "#000"
+                                        : color.toLowerCase() === "navy"
+                                        ? "#001f3f"
+                                        : color.toLowerCase() === "gray"
+                                        ? "#808080"
+                                        : color.toLowerCase() === "red"
+                                        ? "#ff0000"
+                                        : color.toLowerCase() === "blue"
+                                        ? "#0000ff"
+                                        : color.toLowerCase() === "green"
+                                        ? "#008000"
+                                        : color.toLowerCase() === "pink"
+                                        ? "#ffc0cb"
+                                        : color.toLowerCase() === "light blue"
+                                        ? "#add8e6"
+                                        : "#fff",
                                   }}
                                   title={color}
                                 />
@@ -581,20 +598,22 @@ export const Hero = () => {
                           </div>
 
                           <div className="mb-4">
-                            <h4 className="font-medium text-gray-900 text-sm mb-1">Size</h4>
+                            <h4 className="font-medium text-gray-900 text-sm mb-1">
+                              Size
+                            </h4>
                             <div className="flex flex-wrap gap-1">
                               {item.sizes.map((size) => (
-                                <button
+                                <div
                                   key={size}
                                   onClick={() => handleSizeSelect(size)}
-                                  className={`px-2 py-1 text-xs border rounded-md focus:outline-none ${
+                                  className={`px-2 py-1 text-xs text-black border rounded-md focus:outline-none ${
                                     selectedSize === size
                                       ? "border-indigo-500 bg-indigo-100 text-indigo-700"
                                       : "border-gray-200 hover:border-indigo-300"
                                   }`}
                                 >
                                   {size}
-                                </button>
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -616,20 +635,6 @@ export const Hero = () => {
                       </div>
                     </motion.div>
                   ))}
-                </div>
-
-                <div className="mt-6 pt-4 border-t">
-                  <button
-                    onClick={() => {
-                      toast.success(
-                        `Browsing ${showCategoryModal} collection!`
-                      );
-                      closeModal();
-                    }}
-                    className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300"
-                  >
-                    View All {showCategoryModal} Items
-                  </button>
                 </div>
               </div>
             </motion.div>
@@ -682,14 +687,19 @@ export const Hero = () => {
                     <>
                       <div className="space-y-4 mb-6">
                         {cart.map((item, index) => (
-                          <div key={`${item.id}-${index}`} className="flex border-b pb-4">
+                          <div
+                            key={`${item.id}-${index}`}
+                            className="flex border-b pb-4"
+                          >
                             <img
                               src={item.image}
-                              alt={item.name}
+                              alt=""
                               className="w-20 h-20 object-contain bg-gray-100 rounded-md"
                             />
                             <div className="ml-4 flex-1">
-                              <h4 className="font-medium">{item.name}</h4>
+                              <h4 className="font-medium text-gray-600">
+                                {item.name}
+                              </h4>
                               <p className="text-blue-600">
                                 ${item.price.toFixed(2)}
                               </p>
@@ -704,7 +714,7 @@ export const Hero = () => {
                                   onChange={(e) =>
                                     updateSize(index, e.target.value)
                                   }
-                                  className="ml-2 text-sm border rounded p-1"
+                                  className="ml-2 text-gray-600 text-sm border rounded p-1"
                                 >
                                   {item.sizes.map((size) => (
                                     <option key={size} value={size}>
@@ -723,7 +733,9 @@ export const Hero = () => {
                                 >
                                   <Remove fontSize="small" />
                                 </button>
-                                <span className="mx-2">{item.quantity}</span>
+                                <span className="mx-2 text-gray-600">
+                                  {item.quantity}
+                                </span>
                                 <button
                                   onClick={() =>
                                     updateQuantity(index, item.quantity + 1)
@@ -746,8 +758,10 @@ export const Hero = () => {
 
                       <div className="border-t pt-4">
                         <div className="flex justify-between font-bold text-lg mb-6">
-                          <span>Total:</span>
-                          <span>${calculateTotal().toFixed(2)}</span>
+                          <span className="text-gray-600">Total:</span>
+                          <span className="text-blue-400">
+                            ${calculateTotal().toFixed(2)}
+                          </span>
                         </div>
                         <button
                           onClick={() => {
@@ -769,8 +783,8 @@ export const Hero = () => {
         </AnimatePresence>
 
         {/* Payment Modal */}
-        <PaymentModal 
-          showPayment={showPayment} 
+        <PaymentModal
+          showPayment={showPayment}
           setShowPayment={setShowPayment}
           checkoutForm={checkoutForm}
           handleFormChange={handleFormChange}
@@ -838,11 +852,7 @@ export const Hero = () => {
               transition={{ duration: 0.8 }}
               className="relative rounded-xl overflow-hidden shadow-xl h-96 lg:h-auto"
             >
-              <img
-                src={side}
-                alt=""
-                className="w-full h-full object-cover"
-              />
+              <img src={side} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0  bg-opacity-40 flex items-center justify-center">
                 <div className="text-center p-6">
                   <motion.h4
@@ -929,7 +939,7 @@ const PaymentModal = ({
   handleFormChange,
   calculateTotal,
   isProcessing,
-  processCheckout
+  processCheckout,
 }) => {
   return (
     <AnimatePresence>
@@ -951,9 +961,7 @@ const PaymentModal = ({
           >
             <div className="p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  Checkout
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-900">Checkout</h3>
                 <button
                   onClick={() => setShowPayment(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -962,10 +970,12 @@ const PaymentModal = ({
                 </button>
               </div>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                processCheckout();
-              }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  processCheckout();
+                }}
+              >
                 {/* Customer Information */}
                 <div className="space-y-4 mb-6">
                   <div>
@@ -976,7 +986,7 @@ const PaymentModal = ({
                       type="text"
                       name="name"
                       placeholder="John Doe"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.name}
                       onChange={handleFormChange}
                       required
@@ -990,7 +1000,7 @@ const PaymentModal = ({
                       type="email"
                       name="email"
                       placeholder="your@email.com"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.email}
                       onChange={handleFormChange}
                       required
@@ -1003,7 +1013,7 @@ const PaymentModal = ({
                     <textarea
                       name="address"
                       placeholder="123 Main St, City, Country"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.address}
                       onChange={handleFormChange}
                       required
@@ -1014,14 +1024,16 @@ const PaymentModal = ({
 
                 {/* Payment Method Selection */}
                 <div className="mb-6">
-                  <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Payment Method
+                  </h4>
                   <div className="space-y-2">
                     <label className="flex items-center space-x-3">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="credit-card"
-                        checked={checkoutForm.paymentMethod === 'credit-card'}
+                        checked={checkoutForm.paymentMethod === "credit-card"}
                         onChange={handleFormChange}
                         className="form-radio h-4 w-4 text-blue-600"
                       />
@@ -1032,28 +1044,17 @@ const PaymentModal = ({
                         type="radio"
                         name="paymentMethod"
                         value="paypal"
-                        checked={checkoutForm.paymentMethod === 'paypal'}
+                        checked={checkoutForm.paymentMethod === "paypal"}
                         onChange={handleFormChange}
                         className="form-radio h-4 w-4 text-blue-600"
                       />
                       <span>PayPal</span>
                     </label>
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="bank-transfer"
-                        checked={checkoutForm.paymentMethod === 'bank-transfer'}
-                        onChange={handleFormChange}
-                        className="form-radio h-4 w-4 text-blue-600"
-                      />
-                      <span>Bank Transfer</span>
-                    </label>
                   </div>
                 </div>
 
                 {/* Credit Card Fields (shown only when credit-card is selected) */}
-                {checkoutForm.paymentMethod === 'credit-card' && (
+                {checkoutForm.paymentMethod === "credit-card" && (
                   <div className="space-y-4 mb-6">
                     <div>
                       <label className="block text-gray-700 mb-1">
@@ -1062,7 +1063,7 @@ const PaymentModal = ({
                       <input
                         type="text"
                         placeholder="1234 5678 9012 3456"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
                     </div>
@@ -1074,7 +1075,7 @@ const PaymentModal = ({
                         <input
                           type="text"
                           placeholder="MM/YY"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -1083,7 +1084,7 @@ const PaymentModal = ({
                         <input
                           type="text"
                           placeholder="123"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -1095,17 +1096,29 @@ const PaymentModal = ({
                       <input
                         type="text"
                         placeholder="John Doe"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-700 mb-1">
+                        Total :
+                      </label>
+                      <input
+                        type="text"
+                        disabled
+                        className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={`${calculateTotal().toFixed(2)}`}
                       />
                     </div>
                   </div>
                 )}
 
                 <div className="border-t pt-4 mb-6">
-                  <div className="flex justify-between font-bold text-lg">
+                  <div className="flex text-blue-500 justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span className="font-bold">${calculateTotal().toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -1113,11 +1126,11 @@ const PaymentModal = ({
                   type="submit"
                   disabled={isProcessing}
                   className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
-                    isProcessing ? 'opacity-70 cursor-not-allowed' : ''
+                    isProcessing ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
                   {isProcessing ? (
-                    'Processing...'
+                    "Processing..."
                   ) : (
                     <>
                       <Payment />
