@@ -140,7 +140,7 @@ export const Login = () => {
                   </div>
                   <input
                     type="email"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    className={`w-full text-black pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.login.email
                         ? 'border-red-500 focus:ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'
@@ -167,7 +167,7 @@ export const Login = () => {
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
-                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    className={`w-full text-black pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.login.password
                         ? 'border-red-500 focus:ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'
@@ -249,7 +249,7 @@ export const Login = () => {
                     <Person className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    className={`w-full text-black pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.register.name
                         ? 'border-red-500 focus:ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'
@@ -279,7 +279,7 @@ export const Login = () => {
                   </div>
                   <input
                     type="email"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    className={`w-full text-black pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.register.email
                         ? 'border-red-500 focus:ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'
@@ -309,7 +309,7 @@ export const Login = () => {
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
-                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    className={`w-full text-black pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.register.password
                         ? 'border-red-500 focus:ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'
@@ -349,7 +349,7 @@ export const Login = () => {
                   </div>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
-                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    className={`w-full text-black pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                       errors.register.confirmPassword
                         ? 'border-red-500 focus:ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'

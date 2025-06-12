@@ -28,9 +28,24 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s ease;
+
+  /* Light mode colors */
+  background-color: #4a6fa5;
+  color: #ffffff;
+
+  /* Dark mode colors - will be applied automatically */
+  @media (prefers-color-scheme: dark) {
+    background-color: #4a6fa5;
+    color: #f0f0f0;
+    padding: 0.6em 1.2em;
+  }
+}
+button:active {
+  transform: translateY(0);
+  background-color: aquamarine;
+  box-shadow: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -40,24 +55,43 @@ button {
   }
 
   button {
-    background-color: #434242;
     border-radius: 8px;
     border: 1px solid transparent;
     padding: 0.6em 1.2em;
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    /* Light mode colors */
+    background-color: #4a6fa5;
     color: #ffffff;
+
+    /* Dark mode colors - will be applied automatically */
+    @media (prefers-color-scheme: dark) {
+      background-color: #4a6fa5;
+      color: #f0f0f0;
+      padding: 0.6em 1.2em;
+    }
   }
-    .button {
-    background-color: #1848e4;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    color: #ffffff;
+
+  button:hover {
+    border-color: #2a4a7a;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    @media (prefers-color-scheme: dark) {
+      border-color: #4a8aff;
+      padding: 0.6em 1.2em;
+      box-shadow: 0 2px 4px rgba(60, 96, 174, 0.3);
+    }
+  }
+
+  button:active {
+    transform: translateY(0);
+    background-color: aquamarine;
+    box-shadow: none;
   }
 }
 @import "tailwindcss";

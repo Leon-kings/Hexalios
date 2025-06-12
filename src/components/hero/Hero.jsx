@@ -1,6 +1,17 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  ShoppingCart, 
+  Close, 
+  Add, 
+  Remove, 
+  Payment, 
+  LocalShipping, 
+  CheckCircle,
+  Star,
+  StarBorder
+} from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { bannerItems, categories } from "../../assets/data/data";
@@ -13,41 +24,49 @@ const categoryItems = {
       id: 1,
       name: "Summer Dress",
       type: "Dress",
-      price: "$49.99",
+      price: 49.99,
       sizes: ["S", "M", "L", "XL"],
       stock: 12,
       image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Lightweight summer dress with floral pattern"
+      description: "Lightweight summer dress with floral pattern",
+      rating: 4,
+      colors: ["Blue", "White", "Pink"]
     },
     {
       id: 2,
       name: "Denim Jacket",
       type: "Jacket",
-      price: "$79.99",
+      price: 79.99,
       sizes: ["S", "M", "L"],
       stock: 8,
       image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Classic blue denim jacket with front pockets"
+      description: "Classic blue denim jacket with front pockets",
+      rating: 5,
+      colors: ["Blue", "Black"]
     },
     {
       id: 3,
       name: "High Waist Jeans",
       type: "Pants",
-      price: "$59.99",
+      price: 59.99,
       sizes: ["28", "30", "32", "34"],
       stock: 15,
       image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Comfortable high waist jeans with stretch fabric"
+      description: "Comfortable high waist jeans with stretch fabric",
+      rating: 4,
+      colors: ["Blue", "Black", "Gray"]
     },
     {
       id: 4,
       name: "Silk Blouse",
       type: "Top",
-      price: "$65.00",
+      price: 65.00,
       sizes: ["XS", "S", "M"],
       stock: 5,
       image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Elegant silk blouse with button front"
+      description: "Elegant silk blouse with button front",
+      rating: 3,
+      colors: ["White", "Pink"]
     }
   ],
   men: [
@@ -55,41 +74,49 @@ const categoryItems = {
       id: 1,
       name: "Classic Suit",
       type: "Suit",
-      price: "$199.99",
+      price: 199.99,
       sizes: ["38", "40", "42", "44"],
       stock: 7,
       image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Premium wool suit with two-button jacket"
+      description: "Premium wool suit with two-button jacket",
+      rating: 5,
+      colors: ["Black", "Navy", "Gray"]
     },
     {
       id: 2,
       name: "Casual T-Shirt",
       type: "Top",
-      price: "$24.99",
+      price: 24.99,
       sizes: ["S", "M", "L", "XL"],
       stock: 20,
       image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "100% cotton crew neck t-shirt"
+      description: "100% cotton crew neck t-shirt",
+      rating: 4,
+      colors: ["White", "Black", "Gray", "Blue"]
     },
     {
       id: 3,
       name: "Chino Pants",
       type: "Pants",
-      price: "$45.00",
+      price: 45.00,
       sizes: ["30", "32", "34", "36"],
       stock: 12,
       image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Classic fit chino pants in multiple colors"
+      description: "Classic fit chino pants in multiple colors",
+      rating: 4,
+      colors: ["Khaki", "Navy", "Gray"]
     },
     {
       id: 4,
       name: "Leather Jacket",
       type: "Jacket",
-      price: "$249.99",
+      price: 249.99,
       sizes: ["M", "L", "XL"],
       stock: 3,
       image: "https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Genuine leather motorcycle jacket"
+      description: "Genuine leather motorcycle jacket",
+      rating: 5,
+      colors: ["Black", "Brown"]
     }
   ],
   kids: [
@@ -97,41 +124,49 @@ const categoryItems = {
       id: 1,
       name: "Cartoon T-Shirt",
       type: "Top",
-      price: "$19.99",
+      price: 19.99,
       sizes: ["4", "6", "8", "10"],
       stock: 25,
       image: "https://images.unsplash.com/photo-1583744946564-b52d01e2da64?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Fun cartoon print t-shirt for kids"
+      description: "Fun cartoon print t-shirt for kids",
+      rating: 4,
+      colors: ["Blue", "Red", "Green"]
     },
     {
       id: 2,
       name: "Denim Overalls",
       type: "Overalls",
-      price: "$34.99",
+      price: 34.99,
       sizes: ["2T", "3T", "4T"],
       stock: 10,
       image: "https://images.unsplash.com/photo-1601512444020-94430c291557?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Adorable denim overalls with adjustable straps"
+      description: "Adorable denim overalls with adjustable straps",
+      rating: 5,
+      colors: ["Blue", "Light Blue"]
     },
     {
       id: 3,
       name: "Sneakers",
       type: "Shoes",
-      price: "$39.99",
+      price: 39.99,
       sizes: ["10", "11", "12", "13"],
       stock: 18,
       image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Comfortable sneakers with velcro straps"
+      description: "Comfortable sneakers with velcro straps",
+      rating: 4,
+      colors: ["Black", "White", "Red"]
     },
     {
       id: 4,
       name: "Winter Coat",
       type: "Jacket",
-      price: "$59.99",
+      price: 59.99,
       sizes: ["5", "6", "7", "8"],
       stock: 6,
       image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      description: "Warm winter coat with hood"
+      description: "Warm winter coat with hood",
+      rating: 4,
+      colors: ["Red", "Blue", "Pink"]
     }
   ]
 };
@@ -139,6 +174,18 @@ const categoryItems = {
 export const Hero = () => {
   const [showShopModal, setShowShopModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [showCart, setShowCart] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [showDelivery, setShowDelivery] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutForm, setCheckoutForm] = useState({
+    name: '',
+    email: '',
+    address: '',
+    paymentMethod: 'credit-card'
+  });
 
   const handlePurchaseClick = () => {
     setShowShopModal(true);
@@ -146,11 +193,140 @@ export const Hero = () => {
 
   const handleDiscoverClick = (category) => {
     setShowCategoryModal(category.toLowerCase());
+    setSelectedSize(null);
   };
 
   const closeModal = () => {
     setShowShopModal(false);
     setShowCategoryModal(null);
+    setSelectedSize(null);
+  };
+
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size);
+  };
+
+  const addToCart = (product, size = null) => {
+    const selectedSizeToUse = size || selectedSize || product.sizes[0];
+
+    // Check if item already exists in cart
+    const existingItemIndex = cart.findIndex(
+      (item) => item.id === product.id && item.selectedSize === selectedSizeToUse
+    );
+
+    let updatedCart;
+    if (existingItemIndex >= 0) {
+      // Increment quantity if item exists
+      updatedCart = [...cart];
+      updatedCart[existingItemIndex] = {
+        ...updatedCart[existingItemIndex],
+        quantity: updatedCart[existingItemIndex].quantity + 1,
+      };
+    } else {
+      // Add new item to cart
+      const cartItem = {
+        ...product,
+        selectedSize: selectedSizeToUse,
+        quantity: 1,
+      };
+      updatedCart = [...cart, cartItem];
+    }
+
+    setCart(updatedCart);
+    toast.success(`${product.name} (Size: ${selectedSizeToUse}) added to cart!`);
+    setShowCart(true);
+  };
+
+  const removeFromCart = (index) => {
+    const newCart = [...cart];
+    newCart.splice(index, 1);
+    setCart(newCart);
+    toast.info("Item removed from cart");
+  };
+
+  const updateQuantity = (index, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    const newCart = [...cart];
+    newCart[index] = {
+      ...newCart[index],
+      quantity: newQuantity,
+    };
+    setCart(newCart);
+  };
+
+  const updateSize = (index, newSize) => {
+    const newCart = [...cart];
+    newCart[index] = {
+      ...newCart[index],
+      selectedSize: newSize,
+    };
+    setCart(newCart);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setCheckoutForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const processCheckout = async () => {
+    setIsProcessing(true);
+    try {
+      // Validate form
+      if (!checkoutForm.name || !checkoutForm.email || !checkoutForm.address) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success("Order placed successfully!");
+      setCart([]);
+      setShowPayment(false);
+      setShowDelivery(true);
+      setCheckoutForm({
+        name: '',
+        email: '',
+        address: '',
+        paymentMethod: 'credit-card'
+      });
+    } catch (error) {
+      toast.error(error.message || "Checkout failed. Please try again.");
+      console.error('Checkout error:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const calculateDeliveryDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 3 + Math.floor(Math.random() * 3));
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const renderStars = (rating) => {
+    return (
+      <div className="flex">
+        {[1, 2, 3, 4, 5].map((star) =>
+          star <= rating ? (
+            <Star key={star} className="text-yellow-500 text-sm" />
+          ) : (
+            <StarBorder key={star} className="text-yellow-500 text-sm" />
+          )
+        )}
+      </div>
+    );
   };
 
   const shopInfo = {
@@ -351,31 +527,89 @@ export const Hero = () => {
                           <h4 className="font-semibold text-black text-lg">{item.name}</h4>
                           <p className="text-gray-500 text-sm mb-2">{item.type}</p>
                           <p className="text-gray-600 text-sm mb-3">{item.description}</p>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-700 font-medium">
-                              {item.price}
-                            </span>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full ${
-                                item.stock > 5
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
+                          
+                          <div className="flex items-center mb-2">
+                            <div className="flex mr-2">
+                              {renderStars(item.rating)}
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              item.stock > 5
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}>
                               {item.stock} in stock
                             </span>
                           </div>
-                          <div className="mt-3 flex justify-between items-center">
-                            <span className="text-sm text-gray-500">
-                              Sizes: {item.sizes.join(", ")}
-                            </span>
+
+                          <p className="text-gray-700 font-medium mb-3">
+                            ${item.price.toFixed(2)}
+                          </p>
+
+                          <div className="mb-3">
+                            <h4 className="font-medium text-gray-900 text-sm mb-1">Colors</h4>
+                            <div className="flex space-x-1">
+                              {item.colors.map((color) => (
+                                <button
+                                  key={color}
+                                  className="w-6 h-6 rounded-full border border-gray-200 focus:outline-none"
+                                  style={{
+                                    backgroundColor:
+                                        color.toLowerCase() === "white"
+                                          ? "#fff"
+                                          : color.toLowerCase() === "black"
+                                          ? "#000"
+                                          : color.toLowerCase() === "navy"
+                                          ? "#001f3f"
+                                          : color.toLowerCase() === "gray"
+                                          ? "#808080"
+                                          : color.toLowerCase() === "red"
+                                          ? "#ff0000"
+                                          : color.toLowerCase() === "blue"
+                                          ? "#0000ff"
+                                          : color.toLowerCase() === "green"
+                                          ? "#008000"
+                                          : color.toLowerCase() === "pink"
+                                          ? "#ffc0cb"
+                                          : color.toLowerCase() === "light blue"
+                                          ? "#add8e6"
+                                          : "#fff",
+                                  }}
+                                  title={color}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="mb-4">
+                            <h4 className="font-medium text-gray-900 text-sm mb-1">Size</h4>
+                            <div className="flex flex-wrap gap-1">
+                              {item.sizes.map((size) => (
+                                <button
+                                  key={size}
+                                  onClick={() => handleSizeSelect(size)}
+                                  className={`px-2 py-1 text-xs border rounded-md focus:outline-none ${
+                                    selectedSize === size
+                                      ? "border-indigo-500 bg-indigo-100 text-indigo-700"
+                                      : "border-gray-200 hover:border-indigo-300"
+                                  }`}
+                                >
+                                  {size}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center">
                             <button
-                              onClick={() => {
-                                toast.success(`${item.name} added to cart!`);
-                              }}
-                              className="text-sm bg-indigo-600 text-white py-1 px-3 rounded hover:bg-indigo-700 transition duration-300"
+                              onClick={() => addToCart(item)}
+                              className={`text-sm py-1 px-3 rounded transition duration-300 ${
+                                item.stock > 0
+                                  ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                              }`}
+                              disabled={item.stock === 0}
                             >
-                              Add to Cart
+                              {item.stock > 0 ? "Add to Cart" : "Out of Stock"}
                             </button>
                           </div>
                         </div>
@@ -401,6 +635,199 @@ export const Hero = () => {
             </motion.div>
           </motion.div>
         )}
+
+        {/* Cart Modal */}
+        <AnimatePresence>
+          {showCart && (
+            <motion.div
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center p-4 z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCart(false)}
+            >
+              <motion.div
+                className="bg-white rounded-t-xl w-full max-w-md h-[80vh] overflow-y-auto"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Your Cart
+                    </h3>
+                    <button
+                      onClick={() => setShowCart(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <Close />
+                    </button>
+                  </div>
+
+                  {cart.length === 0 ? (
+                    <div className="text-center py-12">
+                      <ShoppingCart className="mx-auto text-gray-400 text-4xl mb-4" />
+                      <p className="text-gray-600">Your cart is empty</p>
+                      <button
+                        onClick={() => setShowCart(false)}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      >
+                        Continue Shopping
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-4 mb-6">
+                        {cart.map((item, index) => (
+                          <div key={`${item.id}-${index}`} className="flex border-b pb-4">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-20 h-20 object-contain bg-gray-100 rounded-md"
+                            />
+                            <div className="ml-4 flex-1">
+                              <h4 className="font-medium">{item.name}</h4>
+                              <p className="text-blue-600">
+                                ${item.price.toFixed(2)}
+                              </p>
+
+                              {/* Size selector */}
+                              <div className="mt-1">
+                                <label className="text-xs text-gray-500">
+                                  Size:
+                                </label>
+                                <select
+                                  value={item.selectedSize}
+                                  onChange={(e) =>
+                                    updateSize(index, e.target.value)
+                                  }
+                                  className="ml-2 text-sm border rounded p-1"
+                                >
+                                  {item.sizes.map((size) => (
+                                    <option key={size} value={size}>
+                                      {size}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="flex items-center mt-2">
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(index, item.quantity - 1)
+                                  }
+                                  className="text-gray-500 hover:text-gray-700"
+                                >
+                                  <Remove fontSize="small" />
+                                </button>
+                                <span className="mx-2">{item.quantity}</span>
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(index, item.quantity + 1)
+                                  }
+                                  className="text-gray-500 hover:text-gray-700"
+                                >
+                                  <Add fontSize="small" />
+                                </button>
+                                <button
+                                  onClick={() => removeFromCart(index)}
+                                  className="ml-auto text-red-500 hover:text-red-700 text-sm"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <div className="flex justify-between font-bold text-lg mb-6">
+                          <span>Total:</span>
+                          <span>${calculateTotal().toFixed(2)}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setShowCart(false);
+                            setShowPayment(true);
+                          }}
+                          className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Payment />
+                          Proceed to Payment
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Payment Modal */}
+        <PaymentModal 
+          showPayment={showPayment} 
+          setShowPayment={setShowPayment}
+          checkoutForm={checkoutForm}
+          handleFormChange={handleFormChange}
+          calculateTotal={calculateTotal}
+          isProcessing={isProcessing}
+          processCheckout={processCheckout}
+        />
+
+        {/* Delivery Estimate Modal */}
+        <AnimatePresence>
+          {showDelivery && (
+            <motion.div
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDelivery(false)}
+            >
+              <motion.div
+                className="bg-white rounded-xl max-w-md w-full p-6 text-center"
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-center mb-4">
+                  <CheckCircle className="text-green-500 text-6xl" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  Payment Successful!
+                </h3>
+
+                <div className="bg-gray-100 p-4 rounded-lg mb-6">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <LocalShipping className="text-blue-500 text-2xl" />
+                    <h4 className="text-lg font-semibold">Delivery Estimate</h4>
+                  </div>
+                  <p className="text-gray-700">
+                    Your order will arrive by{" "}
+                    <span className="font-bold">{calculateDeliveryDate()}</span>
+                  </p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    We'll send you a confirmation email with tracking
+                    information.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setShowDelivery(false)}
+                  className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Continue Shopping
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -491,5 +918,218 @@ export const Hero = () => {
         </div>
       </div>
     </>
+  );
+};
+
+// Payment Modal Component
+const PaymentModal = ({
+  showPayment,
+  setShowPayment,
+  checkoutForm,
+  handleFormChange,
+  calculateTotal,
+  isProcessing,
+  processCheckout
+}) => {
+  return (
+    <AnimatePresence>
+      {showPayment && (
+        <motion.div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center p-4 z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowPayment(false)}
+        >
+          <motion.div
+            className="bg-white rounded-t-xl w-full max-w-md"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Checkout
+                </h3>
+                <button
+                  onClick={() => setShowPayment(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Close />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                processCheckout();
+              }}>
+                {/* Customer Information */}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="John Doe"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={checkoutForm.name}
+                      onChange={handleFormChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="your@email.com"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={checkoutForm.email}
+                      onChange={handleFormChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">
+                      Shipping Address
+                    </label>
+                    <textarea
+                      name="address"
+                      placeholder="123 Main St, City, Country"
+                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={checkoutForm.address}
+                      onChange={handleFormChange}
+                      required
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                {/* Payment Method Selection */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="credit-card"
+                        checked={checkoutForm.paymentMethod === 'credit-card'}
+                        onChange={handleFormChange}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>Credit Card</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="paypal"
+                        checked={checkoutForm.paymentMethod === 'paypal'}
+                        onChange={handleFormChange}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>PayPal</span>
+                    </label>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="bank-transfer"
+                        checked={checkoutForm.paymentMethod === 'bank-transfer'}
+                        onChange={handleFormChange}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>Bank Transfer</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Credit Card Fields (shown only when credit-card is selected) */}
+                {checkoutForm.paymentMethod === 'credit-card' && (
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="block text-gray-700 mb-1">
+                        Card Number
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="1234 5678 9012 3456"
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-gray-700 mb-1">
+                          Expiry Date
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="MM/YY"
+                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-1">CVV</label>
+                        <input
+                          type="text"
+                          placeholder="123"
+                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-1">
+                        Name on Card
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="border-t pt-4 mb-6">
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
+                    isProcessing ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isProcessing ? (
+                    'Processing...'
+                  ) : (
+                    <>
+                      <Payment />
+                      Complete Payment
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

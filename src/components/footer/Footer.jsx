@@ -203,63 +203,6 @@ export const Footer = () => {
               </ul>
             </motion.div>
           </div>
-
-          {/* Copyright & Social */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center"
-          >
-            <div className="mb-4 md:mb-0 text-center md:text-left">
-              <p className="text-gray-400">
-                Copyright © {new Date().getFullYear()} HexaShop Co., Ltd. All
-                Rights Reserved.
-              </p>
-              <p className="text-gray-500 text-sm">
-                Design:{" "}
-                <a
-                  href="https://templatemo.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
-                  TemplateMo
-                </a>
-              </p>
-            </div>
-            <div className="flex space-x-4">
-              <motion.a
-                href="#"
-                whileHover={{ y: -3 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <Facebook />
-              </motion.a>
-              <motion.a
-                href="#"
-                whileHover={{ y: -3 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <Twitter />
-              </motion.a>
-              <motion.a
-                href="#"
-                whileHover={{ y: -3 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <LinkedIn />
-              </motion.a>
-              <motion.a
-                href="#"
-                whileHover={{ y: -3 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <Instagram />
-              </motion.a>
-            </div>
-          </motion.div>
         </div>
       </footer>
     </>
