@@ -10,6 +10,7 @@ import {
   Category,
   LocalOffer,
   Star,
+  StarBorder,
   Store,
   LocationOn,
   Phone,
@@ -22,7 +23,7 @@ import {
   Remove,
   Favorite,
   FavoriteBorder,
-  Share
+  Share,
 } from "@mui/icons-material";
 import { shops } from "../../assets/data/data";
 
@@ -36,13 +37,17 @@ export const ExploreSection = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState({
-    name: '',
-    email: '',
-    address: '',
-    paymentMethod: 'credit-card'
+    name: "",
+    email: "",
+    address: "",
+    paymentMethod: "credit-card",
+    products: [],
+    totalPrice: 0,
+    commodityPrice: 0,
   });
   const [wishlist, setWishlist] = useState(() => {
-    const savedWishlist = typeof window !== 'undefined' ? localStorage.getItem('wishlist') : null;
+    const savedWishlist =
+      typeof window !== "undefined" ? localStorage.getItem("wishlist") : null;
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
@@ -52,8 +57,8 @@ export const ExploreSection = () => {
 
   // Update wishlist in localStorage when it changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
     }
   }, [wishlist]);
 
@@ -62,9 +67,9 @@ export const ExploreSection = () => {
     const newWishlist = wishlist.includes(productId)
       ? wishlist.filter((id) => id !== productId)
       : [...wishlist, productId];
-    
+
     setWishlist(newWishlist);
-    
+
     toast.success(
       wishlist.includes(productId)
         ? "Removed from wishlist"
@@ -74,11 +79,12 @@ export const ExploreSection = () => {
 
   // Cart functionality
   const addToCart = (product, size = null) => {
-    const selectedSizeToUse = size || product.sizes?.[0] || 'One Size';
+    const selectedSizeToUse = size || product.sizes?.[0] || "One Size";
 
     // Check if item already exists in cart
     const existingItemIndex = cart.findIndex(
-      (item) => item.id === product.id && item.selectedSize === selectedSizeToUse
+      (item) =>
+        item.id === product.id && item.selectedSize === selectedSizeToUse
     );
 
     let updatedCart;
@@ -115,7 +121,7 @@ export const ExploreSection = () => {
 
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     const newCart = [...cart];
     newCart[index] = {
       ...newCart[index],
@@ -135,10 +141,35 @@ export const ExploreSection = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setCheckoutForm(prev => ({
+    setCheckoutForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
+  };
+
+  // Prepare checkout data before showing payment modal
+  const prepareCheckout = () => {
+    const products = cart.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      size: item.selectedSize,
+      quantity: item.quantity,
+      image: item.image,
+    }));
+
+    const totalPrice = calculateTotal();
+    const commodityPrice = calculateCommodityPrice();
+
+    setCheckoutForm((prev) => ({
+      ...prev,
+      products,
+      totalPrice,
+      commodityPrice,
+    }));
+
+    setShowCart(false);
+    setShowPayment(true);
   };
 
   // Checkout functionality
@@ -147,25 +178,28 @@ export const ExploreSection = () => {
     try {
       // Validate form
       if (!checkoutForm.name || !checkoutForm.email || !checkoutForm.address) {
-        throw new Error('Please fill in all required fields');
+        throw new Error("Please fill in all required fields");
       }
 
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       toast.success("Order placed successfully!");
       setCart([]);
       setShowPayment(false);
       setShowDelivery(true);
       setCheckoutForm({
-        name: '',
-        email: '',
-        address: '',
-        paymentMethod: 'credit-card'
+        name: "",
+        email: "",
+        address: "",
+        paymentMethod: "credit-card",
+        products: [],
+        totalPrice: 0,
+        commodityPrice: 0,
       });
     } catch (error) {
       toast.error(error.message || "Checkout failed. Please try again.");
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -173,7 +207,15 @@ export const ExploreSection = () => {
 
   // Calculate cart total
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  // Calculate commodity price (80% of total price)
+  const calculateCommodityPrice = () => {
+    return cart.reduce(
+      (total, item) => total + item.price * 0.8 * item.quantity,
+      0
+    );
   };
 
   // Calculate estimated delivery date (3-5 business days from now)
@@ -407,11 +449,11 @@ export const ExploreSection = () => {
 
                             <img
                               src={product.image}
-                              alt={product.name}
+                              alt=""
                               className="w-full h-48 object-cover"
                             />
                             <div className="p-4">
-                              <h4 className="font-semibold text-lg mb-2">
+                              <h4 className="font-semibold text-gray-500 text-lg mb-2">
                                 {product.name}
                               </h4>
                               <div className="flex items-center mb-2">
@@ -430,7 +472,7 @@ export const ExploreSection = () => {
                                   {product.price}
                                 </span>
                               </div>
-                              <button 
+                              <button
                                 className="mt-2 w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                                 onClick={() => addToCart(product)}
                               >
@@ -452,11 +494,11 @@ export const ExploreSection = () => {
                         >
                           <img
                             src={shop.image}
-                            alt={shop.name}
+                            alt=""
                             className="w-full h-48 object-cover"
                           />
                           <div className="p-4">
-                            <h4 className="font-semibold text-lg mb-2">
+                            <h4 className="font-semibold text-gray-600 text-lg mb-2">
                               {shop.name}
                             </h4>
                             <div className="flex items-center mb-2">
@@ -507,7 +549,7 @@ export const ExploreSection = () => {
                   )}
 
                   <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-                    <h4 className="font-bold text-lg mb-3">
+                    <h4 className="font-bold text-blue-400 text-lg mb-3">
                       Why Shop With Us?
                     </h4>
                     <ul className="list-disc pl-5 space-y-2 text-gray-600">
@@ -579,15 +621,22 @@ export const ExploreSection = () => {
                     <>
                       <div className="space-y-4 mb-6">
                         {cart.map((item, index) => (
-                          <div key={`${item.id}-${index}`} className="flex border-b pb-4">
+                          <div
+                            key={`${item.id}-${index}`}
+                            className="flex border-b text-black pb-4"
+                          >
                             <img
                               src={item.image}
-                              alt={item.name}
+                              alt=""
                               className="w-20 h-20 object-contain bg-gray-100 rounded-md"
                             />
                             <div className="ml-4 flex-1">
-                              <h4 className="font-medium">{item.name}</h4>
-                          <span>${item.price}</span>
+                              <h4 className="font-medium text-gray-500">
+                                {item.name}
+                              </h4>
+                              <span className="text-gray-500">
+                                ${item.price}
+                              </span>
 
                               {/* Size selector */}
                               {item.sizes && item.sizes.length > 1 && (
@@ -600,7 +649,7 @@ export const ExploreSection = () => {
                                     onChange={(e) =>
                                       updateSize(index, e.target.value)
                                     }
-                                    className="ml-2 text-sm border rounded p-1"
+                                    className="ml-2 text-gray-500 text-sm border rounded p-1"
                                   >
                                     {item.sizes.map((size) => (
                                       <option key={size} value={size}>
@@ -620,7 +669,9 @@ export const ExploreSection = () => {
                                 >
                                   <Remove fontSize="small" />
                                 </button>
-                                <span className="mx-2">{item.quantity}</span>
+                                <span className="mx-2 text-gray-500">
+                                  {item.quantity}
+                                </span>
                                 <button
                                   onClick={() =>
                                     updateQuantity(index, item.quantity + 1)
@@ -642,15 +693,14 @@ export const ExploreSection = () => {
                       </div>
 
                       <div className="border-t pt-4">
-                        <div className="flex justify-between font-bold text-lg mb-6">
+                        <div className="flex text-black justify-between font-bold text-lg mb-6">
                           <span>Total:</span>
-                          <span>${calculateTotal().toFixed(2)}</span>
+                          <span className="text-blue-400">
+                            ${calculateTotal().toFixed(2)}
+                          </span>
                         </div>
                         <button
-                          onClick={() => {
-                            setShowCart(false);
-                            setShowPayment(true);
-                          }}
+                          // onClick={prepareCheckout}
                           className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                         >
                           <PaymentIcon />
@@ -685,9 +735,7 @@ export const ExploreSection = () => {
               >
                 <div className="p-6 max-h-[80vh] overflow-y-auto">
                   <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Checkout
-                    </h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Checkout</h3>
                     <button
                       onClick={() => setShowPayment(false)}
                       className="text-gray-500 hover:text-gray-700"
@@ -696,10 +744,52 @@ export const ExploreSection = () => {
                     </button>
                   </div>
 
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    processCheckout();
-                  }}>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      processCheckout();
+                    }}
+                  >
+                    {/* Order Summary */}
+                    <div className="mb-6">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Order Summary
+                      </h4>
+                      <div className="divide-y divide-gray-200">
+                        {cart.map((item) => (
+                          <div key={item.id} className="p-4 flex items-center">
+                            <img
+                              src={item.image}
+                              alt=''
+                              className="w-16 h-16 object-contain bg-gray-100 rounded-md mr-4"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                  "https://via.placeholder.com/100x100?text=Shoe";
+                              }}
+                            />
+                            <div className="flex-1">
+                              <h5 className="font-medium text-gray-900">
+                                {item.name}
+                              </h5>
+                              <p className="text-sm text-gray-500">
+                                Size: {item.selectedSize} | Color:{" "}
+                                {item.selectedColor}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900">
+                                ${(item.price * item.quantity).toFixed(2)}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Qty: {item.quantity}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Customer Information */}
                     <div className="space-y-4 mb-6">
                       <div>
@@ -710,7 +800,7 @@ export const ExploreSection = () => {
                           type="text"
                           name="name"
                           placeholder="John Doe"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={checkoutForm.name}
                           onChange={handleFormChange}
                           required
@@ -724,7 +814,7 @@ export const ExploreSection = () => {
                           type="email"
                           name="email"
                           placeholder="your@email.com"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={checkoutForm.email}
                           onChange={handleFormChange}
                           required
@@ -737,7 +827,7 @@ export const ExploreSection = () => {
                         <textarea
                           name="address"
                           placeholder="123 Main St, City, Country"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                           value={checkoutForm.address}
                           onChange={handleFormChange}
                           required
@@ -748,46 +838,48 @@ export const ExploreSection = () => {
 
                     {/* Payment Method Selection */}
                     <div className="mb-6">
-                      <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Payment Method
+                      </h4>
                       <div className="space-y-2">
                         <label className="flex items-center space-x-3">
                           <input
                             type="radio"
                             name="paymentMethod"
                             value="credit-card"
-                            checked={checkoutForm.paymentMethod === 'credit-card'}
+                            checked={checkoutForm.paymentMethod === "credit-card"}
                             onChange={handleFormChange}
                             className="form-radio h-4 w-4 text-blue-600"
                           />
-                          <span>Credit Card</span>
+                          <span className="text-black">Credit Card</span>
                         </label>
                         <label className="flex items-center space-x-3">
                           <input
                             type="radio"
                             name="paymentMethod"
                             value="paypal"
-                            checked={checkoutForm.paymentMethod === 'paypal'}
+                            checked={checkoutForm.paymentMethod === "paypal"}
                             onChange={handleFormChange}
                             className="form-radio h-4 w-4 text-blue-600"
                           />
-                          <span>PayPal</span>
+                          <span className="text-black">PayPal</span>
                         </label>
                         <label className="flex items-center space-x-3">
                           <input
                             type="radio"
                             name="paymentMethod"
                             value="bank-transfer"
-                            checked={checkoutForm.paymentMethod === 'bank-transfer'}
+                            checked={checkoutForm.paymentMethod === "bank-transfer"}
                             onChange={handleFormChange}
                             className="form-radio h-4 w-4 text-blue-600"
                           />
-                          <span>Bank Transfer</span>
+                          <span className="text-black">Bank Transfer</span>
                         </label>
                       </div>
                     </div>
 
                     {/* Credit Card Fields (shown only when credit-card is selected) */}
-                    {checkoutForm.paymentMethod === 'credit-card' && (
+                    {checkoutForm.paymentMethod === "credit-card" && (
                       <div className="space-y-4 mb-6">
                         <div>
                           <label className="block text-gray-700 mb-1">
@@ -796,7 +888,7 @@ export const ExploreSection = () => {
                           <input
                             type="text"
                             placeholder="1234 5678 9012 3456"
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                           />
                         </div>
@@ -808,7 +900,7 @@ export const ExploreSection = () => {
                             <input
                               type="text"
                               placeholder="MM/YY"
-                              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                               required
                             />
                           </div>
@@ -817,7 +909,7 @@ export const ExploreSection = () => {
                             <input
                               type="text"
                               placeholder="123"
-                              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                               required
                             />
                           </div>
@@ -829,7 +921,7 @@ export const ExploreSection = () => {
                           <input
                             type="text"
                             placeholder="John Doe"
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                           />
                         </div>
@@ -837,9 +929,11 @@ export const ExploreSection = () => {
                     )}
 
                     <div className="border-t pt-4 mb-6">
-                      <div className="flex justify-between font-bold text-lg">
+                      <div className="flex text-black justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span>${calculateTotal().toFixed(2)}</span>
+                        <span className="text-blue-400">
+                          ${(calculateTotal() * 1.1).toFixed(2)}
+                        </span>
                       </div>
                     </div>
 
@@ -847,11 +941,11 @@ export const ExploreSection = () => {
                       type="submit"
                       disabled={isProcessing}
                       className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
-                        isProcessing ? 'opacity-70 cursor-not-allowed' : ''
+                        isProcessing ? "opacity-70 cursor-not-allowed" : ""
                       }`}
                     >
                       {isProcessing ? (
-                        'Processing...'
+                        "Processing..."
                       ) : (
                         <>
                           <PaymentIcon />

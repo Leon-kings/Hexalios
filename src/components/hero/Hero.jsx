@@ -17,6 +17,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { bannerItems, categories } from "../../assets/data/data";
 import side from "../../assets/images/left-banner-image.jpg";
+import axios from "axios";
 
 // Mock API data for category items
 const categoryItems = {
@@ -296,19 +297,47 @@ export const Hero = () => {
         throw new Error("Please fill in all required fields");
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Prepare order data
+      const orderData = {
+        customer: {
+          name: checkoutForm.name,
+          email: checkoutForm.email,
+          address: checkoutForm.address,
+        },
+        paymentMethod: checkoutForm.paymentMethod,
+        products: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          size: item.selectedSize,
+          quantity: item.quantity,
+        })),
+        totalPrice: calculateTotal(),
+        commodityPrice: calculateCommodityPrice(),
+      };
 
-      toast.success("Order placed successfully!");
-      setCart([]);
-      setShowPayment(false);
-      setShowDelivery(true);
-      setCheckoutForm({
-        name: "",
-        email: "",
-        address: "",
-        paymentMethod: "credit-card",
-      });
+      // Send order to API
+      const response = await axios.post(
+        "https://api.example.com/orders",
+        orderData
+      );
+
+      if (response.data.success) {
+        toast.success("Order placed successfully!");
+        setCart([]);
+        setShowPayment(false);
+        setShowDelivery(true);
+        setCheckoutForm({
+          name: "",
+          email: "",
+          address: "",
+          paymentMethod: "credit-card",
+        });
+      } else {
+        throw new Error(
+          response.data.message || "Checkout failed. Please try again."
+        );
+      }
     } catch (error) {
       toast.error(error.message || "Checkout failed. Please try again.");
       console.error("Checkout error:", error);
@@ -319,6 +348,13 @@ export const Hero = () => {
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const calculateCommodityPrice = () => {
+    return cart.reduce(
+      (total, item) => total + item.price * 0.8 * item.quantity,
+      0
+    );
   };
 
   const calculateDeliveryDate = () => {
@@ -789,6 +825,8 @@ export const Hero = () => {
           checkoutForm={checkoutForm}
           handleFormChange={handleFormChange}
           calculateTotal={calculateTotal}
+          calculateCommodityPrice={calculateCommodityPrice}
+          cart={cart}
           isProcessing={isProcessing}
           processCheckout={processCheckout}
         />
@@ -938,6 +976,8 @@ const PaymentModal = ({
   checkoutForm,
   handleFormChange,
   calculateTotal,
+  calculateCommodityPrice,
+  cart,
   isProcessing,
   processCheckout,
 }) => {
@@ -1022,6 +1062,46 @@ const PaymentModal = ({
                   </div>
                 </div>
 
+                {/* Products Information */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Order Summary
+                  </h4>
+                  <div className="divide-y divide-gray-200">
+                    {cart.map((item) => (
+                      <div key={item.id} className="p-4 flex items-center">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-16 h-16 object-contain bg-gray-100 rounded-md mr-4"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://via.placeholder.com/100x100?text=Shoe";
+                          }}
+                        />
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900">
+                            {item.name}
+                          </h5>
+                          <p className="text-sm text-gray-500">
+                            Size: {item.selectedSize} | Color:{" "}
+                            {item.selectedColor}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Qty: {item.quantity}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Payment Method Selection */}
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 mb-3">
@@ -1038,17 +1118,6 @@ const PaymentModal = ({
                         className="form-radio h-4 w-4 text-blue-600"
                       />
                       <span>Credit Card</span>
-                    </label>
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="paypal"
-                        checked={checkoutForm.paymentMethod === "paypal"}
-                        onChange={handleFormChange}
-                        className="form-radio h-4 w-4 text-blue-600"
-                      />
-                      <span>PayPal</span>
                     </label>
                   </div>
                 </div>
@@ -1100,25 +1169,30 @@ const PaymentModal = ({
                         required
                       />
                     </div>
-
-                    <div>
-                      <label className="block text-gray-700 mb-1">
-                        Total :
-                      </label>
-                      <input
-                        type="text"
-                        disabled
-                        className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={`${calculateTotal().toFixed(2)}`}
-                      />
-                    </div>
                   </div>
                 )}
 
+                {/* Price Summary */}
                 <div className="border-t pt-4 mb-6">
-                  <div className="flex text-blue-500 justify-between font-bold text-lg">
-                    <span>Total:</span>
-                    <span className="font-bold">${calculateTotal().toFixed(2)}</span>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="text-gray-900">
+                        ${calculateTotal().toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Commodity Price:</span>
+                      <span className="text-gray-900">
+                        ${calculateCommodityPrice().toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total:</span>
+                      <span className="text-blue-500">
+                        ${calculateTotal().toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

@@ -8,9 +8,11 @@ import {
   Phone,
   Email,
   AccessTime,
+  Message,
 } from "@mui/icons-material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "@mui/material/Link";
 
 export const SubscribeSection = () => {
   const [formData, setFormData] = useState({
@@ -153,16 +155,14 @@ export const SubscribeSection = () => {
                       <p className="font-medium text-gray-900">
                         Store Location:
                       </p>
-                      <p className="text-gray-600">
-                        Sunny Isles Beach, FL 33160, United States
-                      </p>
+                      <p className="text-gray-600">SPEZ, FL 33160, Rwanda</p>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <Phone className="text-gray-700 mr-2 mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-medium text-gray-900">Phone:</p>
-                      <p className="text-gray-600">010-020-0340</p>
+                      <p className="text-gray-600">+ 250-787-944-577</p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -171,7 +171,7 @@ export const SubscribeSection = () => {
                       <p className="font-medium text-gray-900">
                         Office Location:
                       </p>
-                      <p className="text-gray-600">North Miami Beach</p>
+                      <p className="text-gray-600">North East Beach</p>
                     </div>
                   </div>
                 </div>
@@ -193,21 +193,22 @@ export const SubscribeSection = () => {
                   <div className="flex items-start">
                     <div className="mr-2 mt-1 flex-shrink-0 w-5 h-5">
                       {/* Social icon placeholder */}
+                      <Message className="text-gray-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Social Media:</p>
                       <p className="text-gray-600">
-                        <a href="#" className="text-blue-600 hover:underline">
+                        <Link className="text-blue-600 hover:underline">
                           Facebook
-                        </a>
+                        </Link>
                         ,{" "}
-                        <a href="#" className="text-blue-600 hover:underline">
+                        <Link className="text-blue-600 hover:underline">
                           Instagram
-                        </a>
+                        </Link>
                         ,{" "}
-                        <a href="#" className="text-blue-600 hover:underline">
+                        <Link className="text-blue-600 hover:underline">
                           LinkedIn
-                        </a>
+                        </Link>
                       </p>
                     </div>
                   </div>

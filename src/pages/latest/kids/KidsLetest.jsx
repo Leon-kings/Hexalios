@@ -2,23 +2,23 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ShoppingCart, 
-  Close, 
-  Add, 
-  Remove, 
-  Payment, 
-  LocalShipping, 
+import {
+  ShoppingCart,
+  Close,
+  Add,
+  Remove,
+  Payment,
+  LocalShipping,
   CheckCircle,
   Star,
   StarBorder,
   Favorite,
   FavoriteBorder,
-  Share
+  Share,
 } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { kidsProducts } from "../../../assets/data/data";
+import axios from "axios";
 
 export const KidsLatest = () => {
   // State management
@@ -32,20 +32,128 @@ export const KidsLatest = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState({
-    name: '',
-    email: '',
-    address: '',
-    paymentMethod: 'credit-card'
+    name: "",
+    email: "",
+    address: "",
+    paymentMethod: "credit-card",
   });
-   const [wishlist, setWishlist] = useState(() => {
-    const savedWishlist = typeof window !== 'undefined' ? localStorage.getItem('wishlist') : null;
+  const [wishlist, setWishlist] = useState(() => {
+    const savedWishlist =
+      typeof window !== "undefined" ? localStorage.getItem("wishlist") : null;
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
+  const [kidsProducts, setKidsProducts] = useState([]);
 
   // Refs
   const sliderRef = useRef(null);
   const autoSlideInterval = useRef(null);
   const productsPerPage = useRef(4);
+
+  // Fetch kids products from testing API
+  useEffect(() => {
+    const fetchKidsProducts = async () => {
+      try {
+        // Using a mock API endpoint with sample kids products
+        const response = await axios.get('https://65e7f8f453d564627a8f8d6c.mockapi.io/kids-products');
+        setKidsProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        // Fallback data if API fails
+        setKidsProducts([
+          {
+            id: 1,
+            name: "Kids T-Shirt",
+            price: 19.99,
+            image: "https://m.media-amazon.com/images/I/61-jBuhtgZL._AC_UY879_.jpg",
+            description: "Comfortable cotton t-shirt for kids",
+            rating: 4,
+            stock: 25,
+            sizes: ['S', 'M', 'L'],
+            colors: ['Red', 'Blue', 'Green'],
+          },
+          {
+            id: 2,
+            name: "Kids Jeans",
+            price: 29.99,
+            image: "https://m.media-amazon.com/images/I/71Swqqe7XAL._AC_UY879_.jpg",
+            description: "Durable jeans for active kids",
+            rating: 5,
+            stock: 18,
+            sizes: ['S', 'M', 'L'],
+            colors: ['Blue', 'Black'],
+          },
+          {
+            id: 3,
+            name: "Kids Shoes",
+            price: 39.99,
+            image: "https://m.media-amazon.com/images/I/61iJ-VsF3VL._AC_UY879_.jpg",
+            description: "Comfortable running shoes for kids",
+            rating: 4,
+            stock: 12,
+            sizes: ['28', '30', '32', '34'],
+            colors: ['Red', 'Blue', 'Black'],
+          },
+          {
+            id: 4,
+            name: "Kids Jacket",
+            price: 49.99,
+            image: "https://m.media-amazon.com/images/I/71X8N9O2QwL._AC_UY879_.jpg",
+            description: "Warm winter jacket for kids",
+            rating: 4,
+            stock: 8,
+            sizes: ['S', 'M', 'L'],
+            colors: ['Blue', 'Pink', 'Red'],
+          },
+          {
+            id: 5,
+            name: "Kids Backpack",
+            price: 24.99,
+            image: "https://m.media-amazon.com/images/I/71K9JZgrWVL._AC_UY879_.jpg",
+            description: "School backpack for kids",
+            rating: 5,
+            stock: 15,
+            sizes: ['One Size'],
+            colors: ['Blue', 'Pink', 'Black'],
+          },
+          {
+            id: 6,
+            name: "Kids Hat",
+            price: 14.99,
+            image: "https://m.media-amazon.com/images/I/61-jBuhtgZL._AC_UY879_.jpg",
+            description: "Sun protection hat for kids",
+            rating: 3,
+            stock: 20,
+            sizes: ['One Size'],
+            colors: ['Red', 'Blue', 'Yellow'],
+          },
+          {
+            id: 7,
+            name: "Kids Socks",
+            price: 9.99,
+            image: "https://m.media-amazon.com/images/I/71Swqqe7XAL._AC_UY879_.jpg",
+            description: "Pack of 6 cotton socks",
+            rating: 4,
+            stock: 30,
+            sizes: ['S', 'M'],
+            colors: ['White', 'Black', 'Mixed'],
+          },
+          {
+            id: 8,
+            name: "Kids Pajamas",
+            price: 22.99,
+            image: "https://m.media-amazon.com/images/I/61iJ-VsF3VL._AC_UY879_.jpg",
+            description: "Comfortable pajama set",
+            rating: 5,
+            stock: 10,
+            sizes: ['S', 'M', 'L'],
+            colors: ['Blue', 'Pink', 'Gray'],
+          }
+        ]);
+      }
+    };
+
+    fetchKidsProducts();
+  }, []);
 
   // Responsive products per page
   useEffect(() => {
@@ -73,12 +181,15 @@ export const KidsLatest = () => {
       autoSlideInterval.current = setInterval(() => {
         setCurrentSlide(
           (prev) =>
-            (prev + 1) % Math.ceil(kidsProducts.length / productsPerPage.current)
+            (prev + 1) %
+            Math.ceil(kidsProducts.length / productsPerPage.current)
         );
       }, 3000);
     };
 
-    startAutoSlide();
+    if (kidsProducts.length > 0) {
+      startAutoSlide();
+    }
 
     return () => {
       if (autoSlideInterval.current) {
@@ -125,7 +236,8 @@ export const KidsLatest = () => {
 
     // Check if item already exists in cart
     const existingItemIndex = cart.findIndex(
-      (item) => item.id === product.id && item.selectedSize === selectedSizeToUse
+      (item) =>
+        item.id === product.id && item.selectedSize === selectedSizeToUse
     );
 
     let updatedCart;
@@ -166,7 +278,7 @@ export const KidsLatest = () => {
 
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     const newCart = [...cart];
     newCart[index] = {
       ...newCart[index],
@@ -186,9 +298,9 @@ export const KidsLatest = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setCheckoutForm(prev => ({
+    setCheckoutForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -198,41 +310,53 @@ export const KidsLatest = () => {
     try {
       // Validate form
       if (!checkoutForm.name || !checkoutForm.email || !checkoutForm.address) {
-        throw new Error('Please fill in all required fields');
+        throw new Error("Please fill in all required fields");
       }
 
-      // Replace with your actual API endpoint
-      const response = await fetch('https://api.example.com/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Prepare order data
+      const orderData = {
+        customer: {
+          name: checkoutForm.name,
+          email: checkoutForm.email,
+          address: checkoutForm.address,
         },
-        body: JSON.stringify({
-          items: cart,
-          total: calculateTotal(),
-          customer: checkoutForm,
-          paymentMethod: checkoutForm.paymentMethod
-        }),
-      });
+        paymentMethod: checkoutForm.paymentMethod,
+        products: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          size: item.selectedSize,
+          quantity: item.quantity,
+        })),
+        totalPrice: calculateTotal(),
+        commodityPrice: calculateCommodityPrice(),
+      };
 
-      if (!response.ok) {
-        throw new Error('Checkout failed');
+      // Send order to API using axios
+      const response = await axios.post(
+        "https://api.example.com/orders",
+        orderData
+      );
+
+      if (response.data.success) {
+        toast.success("Order placed successfully!");
+        setCart([]);
+        setShowPayment(false);
+        setShowDelivery(true);
+        setCheckoutForm({
+          name: "",
+          email: "",
+          address: "",
+          paymentMethod: "credit-card",
+        });
+      } else {
+        throw new Error(
+          response.data.message || "Checkout failed. Please try again."
+        );
       }
-
-      const data = await response.json();
-      toast.success("Order placed successfully!");
-      setCart([]);
-      setShowPayment(false);
-      setShowDelivery(true);
-      setCheckoutForm({
-        name: '',
-        email: '',
-        address: '',
-        paymentMethod: 'credit-card'
-      });
     } catch (error) {
       toast.error(error.message || "Checkout failed. Please try again.");
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -240,7 +364,15 @@ export const KidsLatest = () => {
 
   // Calculate cart total
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  // Calculate commodity price (80% of total price)
+  const calculateCommodityPrice = () => {
+    return cart.reduce(
+      (total, item) => total + item.price * 0.8 * item.quantity,
+      0
+    );
   };
 
   // Navigation controls
@@ -266,8 +398,8 @@ export const KidsLatest = () => {
   // Function to update both state and localStorage
   const updateWishlist = (newWishlist) => {
     setWishlist(newWishlist);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wishlist", JSON.stringify(newWishlist));
     }
   };
 
@@ -276,9 +408,9 @@ export const KidsLatest = () => {
     const newWishlist = wishlist.includes(productId)
       ? wishlist.filter((id) => id !== productId)
       : [...wishlist, productId];
-    
+
     updateWishlist(newWishlist);
-    
+
     toast.success(
       wishlist.includes(productId)
         ? "Removed from wishlist"
@@ -372,7 +504,7 @@ export const KidsLatest = () => {
                       <div className="relative h-64 flex-grow">
                         <img
                           src={product.image}
-                          alt={product.name}
+                          alt=""
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
@@ -484,14 +616,19 @@ export const KidsLatest = () => {
                       <>
                         <div className="space-y-4 mb-6">
                           {cart.map((item, index) => (
-                            <div key={`${item.id}-${index}`} className="flex border-b pb-4">
+                            <div
+                              key={`${item.id}-${index}`}
+                              className="flex border-b pb-4"
+                            >
                               <img
                                 src={item.image}
-                                alt={item.name}
+                                alt=""
                                 className="w-20 h-20 object-contain bg-gray-100 rounded-md"
                               />
                               <div className="ml-4 flex-1">
-                                <h4 className="font-medium">{item.name}</h4>
+                                <h4 className="font-medium text-gray-600">
+                                  {item.name}
+                                </h4>
                                 <p className="text-blue-600">
                                   ${item.price.toFixed(2)}
                                 </p>
@@ -506,7 +643,7 @@ export const KidsLatest = () => {
                                     onChange={(e) =>
                                       updateSize(index, e.target.value)
                                     }
-                                    className="ml-2 text-sm border rounded p-1"
+                                    className="ml-2 text-gray-500 text-sm border rounded p-1"
                                   >
                                     {item.sizes.map((size) => (
                                       <option key={size} value={size}>
@@ -547,9 +684,11 @@ export const KidsLatest = () => {
                         </div>
 
                         <div className="border-t pt-4">
-                          <div className="flex justify-between font-bold text-lg mb-6">
+                          <div className="flex text-black justify-between font-bold text-lg mb-6">
                             <span>Total:</span>
-                            <span>${calculateTotal().toFixed(2)}</span>
+                            <span className="text-blue-500">
+                              ${calculateTotal().toFixed(2)}
+                            </span>
                           </div>
                           <button
                             onClick={() => {
@@ -571,12 +710,14 @@ export const KidsLatest = () => {
           </AnimatePresence>
 
           {/* Payment Modal */}
-          <PaymentModal 
-            showPayment={showPayment} 
+          <PaymentModal
+            showPayment={showPayment}
             setShowPayment={setShowPayment}
             checkoutForm={checkoutForm}
             handleFormChange={handleFormChange}
+            cart={cart}
             calculateTotal={calculateTotal}
+            calculateCommodityPrice={calculateCommodityPrice}
             isProcessing={isProcessing}
             processCheckout={processCheckout}
           />
@@ -608,11 +749,15 @@ export const KidsLatest = () => {
                   <div className="bg-gray-100 p-4 rounded-lg mb-6">
                     <div className="flex items-center justify-center gap-3 mb-3">
                       <LocalShipping className="text-blue-500 text-2xl" />
-                      <h4 className="text-lg font-semibold">Delivery Estimate</h4>
+                      <h4 className="text-lg text-gray-600 font-semibold">
+                        Delivery Estimate
+                      </h4>
                     </div>
                     <p className="text-gray-700">
                       Your order will arrive by{" "}
-                      <span className="font-bold">{calculateDeliveryDate()}</span>
+                      <span className="font-bold">
+                        {calculateDeliveryDate()}
+                      </span>
                     </p>
                     <p className="text-gray-500 text-sm mt-2">
                       We'll send you a confirmation email with tracking
@@ -743,7 +888,7 @@ const ProductModal = ({
           <div className="rounded-xl overflow-hidden">
             <img
               src={product.image}
-              alt={product.name}
+              alt=""
               className="w-full h-auto object-cover"
             />
           </div>
@@ -840,9 +985,11 @@ const PaymentModal = ({
   setShowPayment,
   checkoutForm,
   handleFormChange,
+  cart,
   calculateTotal,
+  calculateCommodityPrice,
   isProcessing,
-  processCheckout
+  processCheckout,
 }) => {
   return (
     <AnimatePresence>
@@ -864,9 +1011,7 @@ const PaymentModal = ({
           >
             <div className="p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  Checkout
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-900">Checkout</h3>
                 <button
                   onClick={() => setShowPayment(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -875,10 +1020,12 @@ const PaymentModal = ({
                 </button>
               </div>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                processCheckout();
-              }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  processCheckout();
+                }}
+              >
                 {/* Customer Information */}
                 <div className="space-y-4 mb-6">
                   <div>
@@ -889,7 +1036,7 @@ const PaymentModal = ({
                       type="text"
                       name="name"
                       placeholder="John Doe"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.name}
                       onChange={handleFormChange}
                       required
@@ -903,7 +1050,7 @@ const PaymentModal = ({
                       type="email"
                       name="email"
                       placeholder="your@email.com"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.email}
                       onChange={handleFormChange}
                       required
@@ -916,7 +1063,7 @@ const PaymentModal = ({
                     <textarea
                       name="address"
                       placeholder="123 Main St, City, Country"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.address}
                       onChange={handleFormChange}
                       required
@@ -925,48 +1072,68 @@ const PaymentModal = ({
                   </div>
                 </div>
 
+                {/* Order Summary */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Order Summary
+                  </h4>
+                  <div className="divide-y divide-gray-200">
+                    {cart.map((item) => (
+                      <div key={item.id} className="p-4 flex items-center">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-16 h-16 object-contain bg-gray-100 rounded-md mr-4"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://via.placeholder.com/100x100?text=Shoe";
+                          }}
+                        />
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900">
+                            {item.name}
+                          </h5>
+                          <p className="text-sm text-gray-500">
+                            Size: {item.selectedSize} | Color:{" "}
+                            {item.selectedColor}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Qty: {item.quantity}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Payment Method Selection */}
                 <div className="mb-6">
-                  <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Payment Method
+                  </h4>
                   <div className="space-y-2">
                     <label className="flex items-center space-x-3">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="credit-card"
-                        checked={checkoutForm.paymentMethod === 'credit-card'}
+                        checked={checkoutForm.paymentMethod === "credit-card"}
                         onChange={handleFormChange}
                         className="form-radio h-4 w-4 text-blue-600"
                       />
-                      <span>Credit Card</span>
-                    </label>
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="paypal"
-                        checked={checkoutForm.paymentMethod === 'paypal'}
-                        onChange={handleFormChange}
-                        className="form-radio h-4 w-4 text-blue-600"
-                      />
-                      <span>PayPal</span>
-                    </label>
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="bank-transfer"
-                        checked={checkoutForm.paymentMethod === 'bank-transfer'}
-                        onChange={handleFormChange}
-                        className="form-radio h-4 w-4 text-blue-600"
-                      />
-                      <span>Bank Transfer</span>
+                      <span className="text-gray-500">Credit Card</span>
                     </label>
                   </div>
                 </div>
 
                 {/* Credit Card Fields (shown only when credit-card is selected) */}
-                {checkoutForm.paymentMethod === 'credit-card' && (
+                {checkoutForm.paymentMethod === "credit-card" && (
                   <div className="space-y-4 mb-6">
                     <div>
                       <label className="block text-gray-700 mb-1">
@@ -975,7 +1142,7 @@ const PaymentModal = ({
                       <input
                         type="text"
                         placeholder="1234 5678 9012 3456"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
                     </div>
@@ -987,7 +1154,7 @@ const PaymentModal = ({
                         <input
                           type="text"
                           placeholder="MM/YY"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -996,7 +1163,7 @@ const PaymentModal = ({
                         <input
                           type="text"
                           placeholder="123"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -1008,17 +1175,34 @@ const PaymentModal = ({
                       <input
                         type="text"
                         placeholder="John Doe"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
                     </div>
                   </div>
                 )}
 
+                {/* Price Summary */}
                 <div className="border-t pt-4 mb-6">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total:</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="text-gray-900">
+                        ${calculateTotal().toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Commodity Price:</span>
+                      <span className="text-gray-900">
+                        ${calculateCommodityPrice().toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total:</span>
+                      <span className="text-blue-500">
+                        ${calculateTotal().toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1026,11 +1210,11 @@ const PaymentModal = ({
                   type="submit"
                   disabled={isProcessing}
                   className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
-                    isProcessing ? 'opacity-70 cursor-not-allowed' : ''
+                    isProcessing ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
                   {isProcessing ? (
-                    'Processing...'
+                    "Processing..."
                   ) : (
                     <>
                       <Payment />

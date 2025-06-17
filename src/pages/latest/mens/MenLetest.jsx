@@ -2,23 +2,24 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ShoppingCart, 
-  Close, 
-  Add, 
-  Remove, 
-  Payment, 
-  LocalShipping, 
+import {
+  ShoppingCart,
+  Close,
+  Add,
+  Remove,
+  Payment,
+  LocalShipping,
   CheckCircle,
   Star,
   StarBorder,
   Favorite,
   FavoriteBorder,
-  Share
+  Share,
 } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { menProducts } from "../../../assets/data/data";
+import axios from "axios";
 
 export const MensLatest = () => {
   // State management
@@ -32,13 +33,17 @@ export const MensLatest = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutForm, setCheckoutForm] = useState({
-    name: '',
-    email: '',
-    address: '',
-    paymentMethod: 'credit-card'
+    name: "",
+    email: "",
+    address: "",
+    paymentMethod: "credit-card",
+    products: [],
+    totalPrice: 0,
+    commodityPrice: 0,
   });
   const [wishlist, setWishlist] = useState(() => {
-    const savedWishlist = typeof window !== 'undefined' ? localStorage.getItem('wishlist') : null;
+    const savedWishlist =
+      typeof window !== "undefined" ? localStorage.getItem("wishlist") : null;
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
@@ -125,7 +130,8 @@ export const MensLatest = () => {
 
     // Check if item already exists in cart
     const existingItemIndex = cart.findIndex(
-      (item) => item.id === product.id && item.selectedSize === selectedSizeToUse
+      (item) =>
+        item.id === product.id && item.selectedSize === selectedSizeToUse
     );
 
     let updatedCart;
@@ -166,7 +172,7 @@ export const MensLatest = () => {
 
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     const newCart = [...cart];
     newCart[index] = {
       ...newCart[index],
@@ -186,10 +192,40 @@ export const MensLatest = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setCheckoutForm(prev => ({
+    setCheckoutForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
+  };
+
+  // Prepare checkout data before showing payment modal
+  const prepareCheckout = () => {
+    const products = cart.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      size: item.selectedSize,
+      quantity: item.quantity,
+      image: item.image,
+    }));
+
+    const totalPrice = calculateTotal();
+    const commodityPrice = calculateCommodityPrice();
+
+    setCheckoutForm((prev) => ({
+      ...prev,
+      products,
+      totalPrice,
+      commodityPrice,
+    }));
+
+    setShowCart(false);
+    setShowPayment(true);
+  };
+
+  // Calculate commodity price (example: 10% of total price)
+  const calculateCommodityPrice = () => {
+    return calculateTotal() * 0.1; // 10% of total price
   };
 
   // Checkout functionality
@@ -198,41 +234,54 @@ export const MensLatest = () => {
     try {
       // Validate form
       if (!checkoutForm.name || !checkoutForm.email || !checkoutForm.address) {
-        throw new Error('Please fill in all required fields');
+        throw new Error("Please fill in all required fields");
       }
 
-      // Replace with your actual API endpoint
-      const response = await fetch('https://api.example.com/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Prepare the data to send
+      const orderData = {
+        customer: {
+          name: checkoutForm.name,
+          email: checkoutForm.email,
+          address: checkoutForm.address,
         },
-        body: JSON.stringify({
-          items: cart,
-          total: calculateTotal(),
-          customer: checkoutForm,
-          paymentMethod: checkoutForm.paymentMethod
-        }),
-      });
+        paymentMethod: checkoutForm.paymentMethod,
+        products: checkoutForm.products,
+        totalPrice: checkoutForm.totalPrice,
+        commodityPrice: checkoutForm.commodityPrice,
+        orderDate: new Date().toISOString(),
+      };
 
-      if (!response.ok) {
-        throw new Error('Checkout failed');
+      // Send data to API using axios
+      const response = await axios.post(
+        "https://api.example.com/checkout",
+        orderData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Order placed successfully!");
+        setCart([]);
+        setShowPayment(false);
+        setShowDelivery(true);
+        setCheckoutForm({
+          name: "",
+          email: "",
+          address: "",
+          paymentMethod: "credit-card",
+          products: [],
+          totalPrice: 0,
+          commodityPrice: 0,
+        });
+      } else {
+        throw new Error(response.data.message || "Checkout failed");
       }
-
-      const data = await response.json();
-      toast.success("Order placed successfully!");
-      setCart([]);
-      setShowPayment(false);
-      setShowDelivery(true);
-      setCheckoutForm({
-        name: '',
-        email: '',
-        address: '',
-        paymentMethod: 'credit-card'
-      });
     } catch (error) {
       toast.error(error.message || "Checkout failed. Please try again.");
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -240,7 +289,7 @@ export const MensLatest = () => {
 
   // Calculate cart total
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   // Navigation controls
@@ -266,8 +315,8 @@ export const MensLatest = () => {
   // Function to update both state and localStorage
   const updateWishlist = (newWishlist) => {
     setWishlist(newWishlist);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wishlist", JSON.stringify(newWishlist));
     }
   };
 
@@ -276,9 +325,9 @@ export const MensLatest = () => {
     const newWishlist = wishlist.includes(productId)
       ? wishlist.filter((id) => id !== productId)
       : [...wishlist, productId];
-    
+
     updateWishlist(newWishlist);
-    
+
     toast.success(
       wishlist.includes(productId)
         ? "Removed from wishlist"
@@ -484,14 +533,19 @@ export const MensLatest = () => {
                       <>
                         <div className="space-y-4 mb-6">
                           {cart.map((item, index) => (
-                            <div key={`${item.id}-${index}`} className="flex border-b pb-4">
+                            <div
+                              key={`${item.id}-${index}`}
+                              className="flex border-b pb-4"
+                            >
                               <img
                                 src={item.image}
                                 alt={item.name}
                                 className="w-20 h-20 object-contain bg-gray-100 rounded-md"
                               />
                               <div className="ml-4 flex-1">
-                                <h4 className="font-medium">{item.name}</h4>
+                                <h4 className="font-medium text-gray-600">
+                                  {item.name}
+                                </h4>
                                 <p className="text-blue-600">
                                   ${item.price.toFixed(2)}
                                 </p>
@@ -506,7 +560,7 @@ export const MensLatest = () => {
                                     onChange={(e) =>
                                       updateSize(index, e.target.value)
                                     }
-                                    className="ml-2 text-sm border rounded p-1"
+                                    className="ml-2 text-sm text-gray-500 border rounded p-1"
                                   >
                                     {item.sizes.map((size) => (
                                       <option key={size} value={size}>
@@ -547,15 +601,14 @@ export const MensLatest = () => {
                         </div>
 
                         <div className="border-t pt-4">
-                          <div className="flex justify-between font-bold text-lg mb-6">
+                          <div className="flex text-black justify-between font-bold text-lg mb-6">
                             <span>Total:</span>
-                            <span>${calculateTotal().toFixed(2)}</span>
+                            <span className="text-blue-400">
+                              ${calculateTotal().toFixed(2)}
+                            </span>
                           </div>
                           <button
-                            onClick={() => {
-                              setShowCart(false);
-                              setShowPayment(true);
-                            }}
+                            onClick={prepareCheckout}
                             className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                           >
                             <Payment />
@@ -571,14 +624,15 @@ export const MensLatest = () => {
           </AnimatePresence>
 
           {/* Payment Modal */}
-          <PaymentModal 
-            showPayment={showPayment} 
+          <PaymentModal
+            showPayment={showPayment}
             setShowPayment={setShowPayment}
             checkoutForm={checkoutForm}
             handleFormChange={handleFormChange}
             calculateTotal={calculateTotal}
             isProcessing={isProcessing}
             processCheckout={processCheckout}
+            cart={cart}
           />
 
           {/* Delivery Estimate Modal */}
@@ -608,11 +662,15 @@ export const MensLatest = () => {
                   <div className="bg-gray-100 p-4 rounded-lg mb-6">
                     <div className="flex items-center justify-center gap-3 mb-3">
                       <LocalShipping className="text-blue-500 text-2xl" />
-                      <h4 className="text-lg font-semibold">Delivery Estimate</h4>
+                      <h4 className="text-lg font-semibold text-gray-500">
+                        Delivery Estimate
+                      </h4>
                     </div>
                     <p className="text-gray-700">
                       Your order will arrive by{" "}
-                      <span className="font-bold">{calculateDeliveryDate()}</span>
+                      <span className="font-bold">
+                        {calculateDeliveryDate()}
+                      </span>
                     </p>
                     <p className="text-gray-500 text-sm mt-2">
                       We'll send you a confirmation email with tracking
@@ -630,23 +688,6 @@ export const MensLatest = () => {
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Cart Button */}
-          <div className="fixed bottom-6 right-6 z-40">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setShowCart(true)}
-              className="bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center relative"
-            >
-              <ShoppingCart />
-              {cart.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
-                  {cart.reduce((total, item) => total + item.quantity, 0)}
-                </span>
-              )}
-            </motion.button>
-          </div>
         </div>
       </section>
     </>
@@ -859,7 +900,8 @@ const PaymentModal = ({
   handleFormChange,
   calculateTotal,
   isProcessing,
-  processCheckout
+  processCheckout,
+  cart,
 }) => {
   return (
     <AnimatePresence>
@@ -881,9 +923,7 @@ const PaymentModal = ({
           >
             <div className="p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  Checkout
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-900">Checkout</h3>
                 <button
                   onClick={() => setShowPayment(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -892,10 +932,52 @@ const PaymentModal = ({
                 </button>
               </div>
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                processCheckout();
-              }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  processCheckout();
+                }}
+              >
+                {/* Order Summary */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Order Summary
+                  </h4>
+                  <div className="divide-y divide-gray-200">
+                    {cart.map((item) => (
+                      <div key={item.id} className="p-4 flex items-center">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-16 h-16 object-contain bg-gray-100 rounded-md mr-4"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://via.placeholder.com/100x100?text=Shoe";
+                          }}
+                        />
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900">
+                            {item.name}
+                          </h5>
+                          <p className="text-sm text-gray-500">
+                            Size: {item.selectedSize} | Color:{" "}
+                            {item.selectedColor}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Qty: {item.quantity}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Customer Information */}
                 <div className="space-y-4 mb-6">
                   <div>
@@ -906,7 +988,7 @@ const PaymentModal = ({
                       type="text"
                       name="name"
                       placeholder="John Doe"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.name}
                       onChange={handleFormChange}
                       required
@@ -920,7 +1002,7 @@ const PaymentModal = ({
                       type="email"
                       name="email"
                       placeholder="your@email.com"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.email}
                       onChange={handleFormChange}
                       required
@@ -933,7 +1015,7 @@ const PaymentModal = ({
                     <textarea
                       name="address"
                       placeholder="123 Main St, City, Country"
-                      className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={checkoutForm.address}
                       onChange={handleFormChange}
                       required
@@ -944,46 +1026,48 @@ const PaymentModal = ({
 
                 {/* Payment Method Selection */}
                 <div className="mb-6">
-                  <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Payment Method
+                  </h4>
                   <div className="space-y-2">
                     <label className="flex items-center space-x-3">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="credit-card"
-                        checked={checkoutForm.paymentMethod === 'credit-card'}
+                        checked={checkoutForm.paymentMethod === "credit-card"}
                         onChange={handleFormChange}
                         className="form-radio h-4 w-4 text-blue-600"
                       />
-                      <span>Credit Card</span>
+                      <span className="text-gray-500">Credit Card</span>
                     </label>
                     <label className="flex items-center space-x-3">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="paypal"
-                        checked={checkoutForm.paymentMethod === 'paypal'}
+                        checked={checkoutForm.paymentMethod === "paypal"}
                         onChange={handleFormChange}
                         className="form-radio h-4 w-4 text-blue-600"
                       />
-                      <span>PayPal</span>
+                      <span className="text-gray-500">PayPal</span>
                     </label>
                     <label className="flex items-center space-x-3">
                       <input
                         type="radio"
                         name="paymentMethod"
                         value="bank-transfer"
-                        checked={checkoutForm.paymentMethod === 'bank-transfer'}
+                        checked={checkoutForm.paymentMethod === "bank-transfer"}
                         onChange={handleFormChange}
                         className="form-radio h-4 w-4 text-blue-600"
                       />
-                      <span>Bank Transfer</span>
+                      <span className="text-gray-500">Bank Transfer</span>
                     </label>
                   </div>
                 </div>
 
                 {/* Credit Card Fields (shown only when credit-card is selected) */}
-                {checkoutForm.paymentMethod === 'credit-card' && (
+                {checkoutForm.paymentMethod === "credit-card" && (
                   <div className="space-y-4 mb-6">
                     <div>
                       <label className="block text-gray-700 mb-1">
@@ -992,7 +1076,7 @@ const PaymentModal = ({
                       <input
                         type="text"
                         placeholder="1234 5678 9012 3456"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
                     </div>
@@ -1004,7 +1088,7 @@ const PaymentModal = ({
                         <input
                           type="text"
                           placeholder="MM/YY"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -1013,7 +1097,7 @@ const PaymentModal = ({
                         <input
                           type="text"
                           placeholder="123"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -1025,7 +1109,7 @@ const PaymentModal = ({
                       <input
                         type="text"
                         placeholder="John Doe"
-                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
                     </div>
@@ -1033,9 +1117,11 @@ const PaymentModal = ({
                 )}
 
                 <div className="border-t pt-4 mb-6">
-                  <div className="flex justify-between font-bold text-lg">
+                  <div className="flex text-black justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span className="text-blue-400">
+                      ${(calculateTotal() * 1.1).toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
@@ -1043,11 +1129,11 @@ const PaymentModal = ({
                   type="submit"
                   disabled={isProcessing}
                   className={`w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2 ${
-                    isProcessing ? 'opacity-70 cursor-not-allowed' : ''
+                    isProcessing ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
                   {isProcessing ? (
-                    'Processing...'
+                    "Processing..."
                   ) : (
                     <>
                       <Payment />

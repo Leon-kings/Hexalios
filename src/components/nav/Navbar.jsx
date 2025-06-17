@@ -23,11 +23,13 @@ import {
   Visibility,
   VisibilityOff,
   ElectricalServices,
-  People
+  People,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { ToastContainer } from "react-toastify";
 import logo from "../../assets/images/logo.png";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,18 +54,18 @@ export const Navbar = () => {
     password: "",
     confirmPassword: "",
   });
-  
+
   const [errors, setErrors] = useState({
     login: {
       email: "",
-      password: ""
+      password: "",
     },
     register: {
       name: "",
       email: "",
       password: "",
-      confirmPassword: ""
-    }
+      confirmPassword: "",
+    },
   });
 
   // Close modal when clicking outside content
@@ -137,10 +139,10 @@ export const Navbar = () => {
     let valid = true;
     const newErrors = {
       login: { email: "", password: "" },
-      register: { name: "", email: "", password: "", confirmPassword: "" }
+      register: { name: "", email: "", password: "", confirmPassword: "" },
     };
 
-    if (mode === 'login') {
+    if (mode === "login") {
       if (!loginData.email) {
         newErrors.login.email = "Email is required";
         valid = false;
@@ -186,27 +188,30 @@ export const Navbar = () => {
   };
 
   const handleLogin = async () => {
-    if (!validateForm('login')) return;
-    
+    if (!validateForm("login")) return;
+
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL}/login`, loginData);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", loginData.email);
+      toast.success("Login successful!");
       setIsLoggedIn(true);
       setUser({ ...response.data.user, email: loginData.email });
       closeModal();
       setLoginData({ email: "", password: "" });
+      console.log(loginData);
     } catch (error) {
-      console.error("Login error:", error);
-      alert(error.response?.data?.message || "Login failed");
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleRegister = async () => {
-    if (!validateForm('register')) return;
+    if (!validateForm("register")) return;
 
     setIsLoading(true);
     try {
@@ -226,9 +231,12 @@ export const Navbar = () => {
         password: "",
         confirmPassword: "",
       });
+      toast.success('Register successfull.');
+      console.log(registerData);
     } catch (error) {
-      console.error("Registration error:", error);
-      alert(error.response?.data?.message || "Registration failed");
+      // console.error("Registration error:", error);
+      // alert(error.response?.data?.message || "Registration failed");
+      toast.error('Register unsuccessfull.');
     } finally {
       setIsLoading(false);
     }
@@ -244,8 +252,13 @@ export const Navbar = () => {
     });
     setErrors({
       login: { email: "", password: "" },
-      register: { name: "", email: "", password: "", confirmPassword: "" }
+      register: { name: "", email: "", password: "", confirmPassword: "" },
     });
+  };
+
+  // handleRemember
+  const handleRemember = () => {
+    toast.success("Remember your password because it's good!");
   };
 
   const handleLogout = () => {
@@ -290,9 +303,7 @@ export const Navbar = () => {
                 if (item.requiresAuth && !isLoggedIn) return null;
                 return (
                   <Link to={item.path} key={item.label}>
-                    <button
-                      className="flex items-center px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-                    >
+                    <button className="flex items-center px-4 py-2 rounded hover:bg-blue-700 transition-colors">
                       {item.icon}
                       <span className="ml-2">{item.label}</span>
                     </button>
@@ -337,8 +348,7 @@ export const Navbar = () => {
                     onClick={handleMenuOpen}
                   >
                     {user?.avatar ? (
-                      <People className="text-blue-500"
-                      />
+                      <People className="text-blue-500" />
                     ) : (
                       <AccountCircle className="w-8 h-8" />
                     )}
@@ -403,9 +413,7 @@ export const Navbar = () => {
                   if (item.requiresAuth && !isLoggedIn) return null;
                   return (
                     <Link to={item.path} key={item.label}>
-                      <button
-                        className="w-full flex items-center px-4 py-2 rounded hover:bg-blue-800 transition-colors"
-                      >
+                      <button className="w-full flex items-center px-4 py-2 rounded hover:bg-blue-800 transition-colors">
                         {item.icon}
                         <span className="ml-2">{item.label}</span>
                       </button>
@@ -479,18 +487,18 @@ export const Navbar = () => {
 
         {/* Auth Modal */}
         {openAuthModal && (
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
             onClick={handleOutsideClick}
           >
             <ToastContainer position="top-right" autoClose={3000} />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md relative"
             >
-              <button 
+              <button
                 onClick={closeModal}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors z-10"
               >
@@ -498,12 +506,12 @@ export const Navbar = () => {
               </button>
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
                 <h1 className="text-2xl font-bold text-center">
-                  {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
+                  {authMode === "login" ? "Welcome Back" : "Create Account"}
                 </h1>
                 <p className="text-center text-blue-100 mt-1">
-                  {authMode === 'login' 
-                    ? 'Sign in to access your account' 
-                    : 'Join us to get started'}
+                  {authMode === "login"
+                    ? "Sign in to access your account"
+                    : "Join us to get started"}
                 </p>
               </div>
 
@@ -522,21 +530,26 @@ export const Navbar = () => {
                           type="email"
                           className={`w-full pl-10 text-black pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.login.email
-                              ? 'border-red-500 focus:ring-red-200'
-                              : 'border-gray-300 focus:ring-blue-200'
+                              ? "border-red-500 focus:ring-red-200"
+                              : "border-gray-300 focus:ring-blue-200"
                           }`}
                           value={loginData.email}
                           onChange={(e) =>
-                            setLoginData({ ...loginData, email: e.target.value })
+                            setLoginData({
+                              ...loginData,
+                              email: e.target.value,
+                            })
                           }
                           placeholder="your@email.com"
                         />
                       </div>
                       {errors.login.email && (
-                        <p className="mt-1 text-sm text-red-600">{errors.login.email}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.login.email}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Password
@@ -549,8 +562,8 @@ export const Navbar = () => {
                           type={showPassword ? "text" : "password"}
                           className={`w-full pl-10 pr-10 text-black py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.login.password
-                              ? 'border-red-500 focus:ring-red-200'
-                              : 'border-gray-300 focus:ring-blue-200'
+                              ? "border-red-500 focus:ring-red-200"
+                              : "border-gray-300 focus:ring-blue-200"
                           }`}
                           value={loginData.password}
                           onChange={(e) =>
@@ -570,27 +583,36 @@ export const Navbar = () => {
                         </button>
                       </div>
                       {errors.login.password && (
-                        <p className="mt-1 text-sm text-red-600">{errors.login.password}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.login.password}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <input
                           id="remember-me"
                           name="remember-me"
                           type="checkbox"
+                          // onClick={handleRemember}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="remember-me"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
                           Remember me
                         </label>
                       </div>
-                      <button className="text-sm text-blue-600 hover:underline">
+                      <button
+                        onClick={handleRemember}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
                         Forgot password?
                       </button>
                     </div>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -601,10 +623,10 @@ export const Navbar = () => {
                       {isLoading ? (
                         <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
                       ) : (
-                        'Sign In'
+                        "Sign In"
                       )}
                     </motion.button>
-                    
+
                     <div className="text-center text-sm text-gray-600 pt-2">
                       Don't have an account?{" "}
                       <button
@@ -631,8 +653,8 @@ export const Navbar = () => {
                         <input
                           className={`w-full pl-10 text-black pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.register.name
-                              ? 'border-red-500 focus:ring-red-200'
-                              : 'border-gray-300 focus:ring-blue-200'
+                              ? "border-red-500 focus:ring-red-200"
+                              : "border-gray-300 focus:ring-blue-200"
                           }`}
                           value={registerData.name}
                           onChange={(e) =>
@@ -645,10 +667,12 @@ export const Navbar = () => {
                         />
                       </div>
                       {errors.register.name && (
-                        <p className="mt-1 text-sm text-red-600">{errors.register.name}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.register.name}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Email Address
@@ -661,8 +685,8 @@ export const Navbar = () => {
                           type="email"
                           className={`w-full pl-10 text-black pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.register.email
-                              ? 'border-red-500 focus:ring-red-200'
-                              : 'border-gray-300 focus:ring-blue-200'
+                              ? "border-red-500 focus:ring-red-200"
+                              : "border-gray-300 focus:ring-blue-200"
                           }`}
                           value={registerData.email}
                           onChange={(e) =>
@@ -675,10 +699,12 @@ export const Navbar = () => {
                         />
                       </div>
                       {errors.register.email && (
-                        <p className="mt-1 text-sm text-red-600">{errors.register.email}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.register.email}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Password
@@ -691,8 +717,8 @@ export const Navbar = () => {
                           type={showPassword ? "text" : "password"}
                           className={`w-full pl-10 text-black pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.register.password
-                              ? 'border-red-500 focus:ring-red-200'
-                              : 'border-gray-300 focus:ring-blue-200'
+                              ? "border-red-500 focus:ring-red-200"
+                              : "border-gray-300 focus:ring-blue-200"
                           }`}
                           value={registerData.password}
                           onChange={(e) =>
@@ -712,13 +738,15 @@ export const Navbar = () => {
                         </button>
                       </div>
                       {errors.register.password && (
-                        <p className="mt-1 text-sm text-red-600">{errors.register.password}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.register.password}
+                        </p>
                       )}
                       <p className="mt-1 text-xs text-gray-500">
                         Must be at least 6 characters
                       </p>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Confirm Password
@@ -731,8 +759,8 @@ export const Navbar = () => {
                           type={showConfirmPassword ? "text" : "password"}
                           className={`w-full pl-10 pr-10 py-2 text-black border rounded-lg focus:outline-none focus:ring-2 ${
                             errors.register.confirmPassword
-                              ? 'border-red-500 focus:ring-red-200'
-                              : 'border-gray-300 focus:ring-blue-200'
+                              ? "border-red-500 focus:ring-red-200"
+                              : "border-gray-300 focus:ring-blue-200"
                           }`}
                           value={registerData.confirmPassword}
                           onChange={(e) =>
@@ -746,16 +774,24 @@ export const Navbar = () => {
                         <button
                           type="button"
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                         >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
                         </button>
                       </div>
                       {errors.register.confirmPassword && (
-                        <p className="mt-1 text-sm text-red-600">{errors.register.confirmPassword}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.register.confirmPassword}
+                        </p>
                       )}
                     </div>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -766,10 +802,10 @@ export const Navbar = () => {
                       {isLoading ? (
                         <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
                       ) : (
-                        'Sign Up'
+                        "Sign Up"
                       )}
                     </motion.button>
-                    
+
                     <div className="text-center text-sm text-gray-600 pt-2">
                       Already have an account?{" "}
                       <button
