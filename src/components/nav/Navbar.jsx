@@ -120,7 +120,7 @@ export const Navbar = () => {
     }
   }, []);
 
-  const API_URL = "https://your-api-endpoint.com/auth";
+  const API_URL = "https://hexaliosnode.onrender.com/auth";
 
   const verifyToken = async (token, email) => {
     try {

@@ -700,7 +700,7 @@ export const ExploreSection = () => {
                           </span>
                         </div>
                         <button
-                          // onClick={prepareCheckout}
+                          onClick={prepareCheckout}
                           className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                         >
                           <PaymentIcon />
