@@ -52,7 +52,7 @@ export const Navbar = () => {
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
+ 
   });
 
   const [errors, setErrors] = useState({
@@ -64,7 +64,7 @@ export const Navbar = () => {
       name: "",
       email: "",
       password: "",
-      confirmPassword: "",
+   
     },
   });
 
@@ -119,6 +119,7 @@ export const Navbar = () => {
       verifyToken(token, email);
     }
   }, []);
+
 
   const API_URL = "https://hexaliosnode.onrender.com/auth";
 
@@ -196,6 +197,7 @@ export const Navbar = () => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("email", loginData.email);
       toast.success("Login successful!");
+    
       setIsLoggedIn(true);
       setUser({ ...response.data.user, email: loginData.email });
       closeModal();
@@ -229,7 +231,7 @@ export const Navbar = () => {
         name: "",
         email: "",
         password: "",
-        confirmPassword: "",
+     
       });
       toast.success('Register successfull.');
       console.log(registerData);
@@ -248,7 +250,7 @@ export const Navbar = () => {
       name: "",
       email: "",
       password: "",
-      confirmPassword: "",
+   
     });
     setErrors({
       login: { email: "", password: "" },
