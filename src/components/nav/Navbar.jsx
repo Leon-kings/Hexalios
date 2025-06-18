@@ -34,7 +34,7 @@ import "react-toastify/dist/ReactToastify.css";
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState("login");
@@ -52,7 +52,7 @@ export const Navbar = () => {
     name: "",
     email: "",
     password: "",
- 
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({
@@ -64,7 +64,7 @@ export const Navbar = () => {
       name: "",
       email: "",
       password: "",
-   
+      confirmPassword: "",
     },
   });
 
@@ -76,7 +76,12 @@ export const Navbar = () => {
   };
 
   const navItems = [
-    { label: "Home", path: "/", icon: <Home className="size-6 text-white" /> },
+    {
+      label: "Home",
+      path: "/",
+      icon: <Home className="size-6 text-white" />,
+      requiresAuth: false,
+    },
     {
       label: "Servises",
       path: "/78318",
@@ -91,18 +96,15 @@ export const Navbar = () => {
       label: "Shops",
       path: "/89309",
       icon: <ShoppingCart className="size-6 text-white" />,
+      requiresAuth: false,
     },
     {
       label: "Contacts",
       path: "/63819",
       icon: <ContactPage className="size-6 text-white" />,
+      requiresAuth: false,
     },
-    {
-      label: "Dashboard",
-      path: "/dashboard",
-      icon: <Dashboard className="w-5 h-5" />,
-      requiresAuth: true,
-    },
+
     {
       label: "Settings",
       path: "/settings",
@@ -119,7 +121,6 @@ export const Navbar = () => {
       verifyToken(token, email);
     }
   }, []);
-
 
   const API_URL = "https://hexaliosnode.onrender.com/auth";
 
@@ -188,21 +189,51 @@ export const Navbar = () => {
     return valid;
   };
 
+  // Check for existing login on app load
+  useEffect(() => {
+    const userData = localStorage.getItem("userData");
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      const now = new Date();
+      const expirationDate = new Date(parsedData.expiresAt);
+
+      if (now < expirationDate) {
+        // Still valid, log the user in
+        setIsLoggedIn(true);
+        setUser(parsedData.user);
+      } else {
+        // Expired, clear storage
+        localStorage.removeItem("userData");
+      }
+    }
+  }, []);
+
   const handleLogin = async () => {
     if (!validateForm("login")) return;
 
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL}/login`, loginData);
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("email", loginData.email);
+
+      // Calculate expiration date (current time + 2 days)
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 2);
+
+      // Store all user data and expiration in localStorage
+      const userData = {
+        token: response.data.token,
+        email: loginData.email,
+        user: { ...response.data.user, email: loginData.email },
+        expiresAt: expirationDate.toISOString(),
+      };
+
+      localStorage.setItem("userData", JSON.stringify(userData));
       toast.success("Login successful!");
-    
+
       setIsLoggedIn(true);
-      setUser({ ...response.data.user, email: loginData.email });
+      setUser(userData.user);
       closeModal();
       setLoginData({ email: "", password: "" });
-      console.log(loginData);
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Login failed. Please try again."
@@ -212,37 +243,56 @@ export const Navbar = () => {
     }
   };
 
-  const handleRegister = async () => {
-    if (!validateForm("register")) return;
+const handleRegister = async () => {
+  if (!validateForm("register")) return;
 
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${API_URL}/register`, {
-        name: registerData.name,
-        email: registerData.email,
-        password: registerData.password,
-      });
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("email", registerData.email);
-      setIsLoggedIn(true);
-      setUser({ ...response.data.user, email: registerData.email });
-      closeModal();
-      setRegisterData({
-        name: "",
-        email: "",
-        password: "",
-     
-      });
-      toast.success('Register successfull.');
-      console.log(registerData);
-    } catch (error) {
-      // console.error("Registration error:", error);
-      // alert(error.response?.data?.message || "Registration failed");
-      toast.error('Register unsuccessfull.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+  try {
+    const response = await axios.post(`${API_URL}/register`, { // Note /register endpoint
+      name: registerData.name,
+      email: registerData.email,
+      password: registerData.password,
+      confirmPassword:registerData.confirmPassword
+    });
+
+    // Calculate expiration date (current time + 2 days)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 2);
+
+    // Store all user data
+    const userData = {
+      token: response.data.token || response.data.accessToken, // Handle different API responses
+      email: registerData.email,
+      user: { 
+        ...(response.data.user || response.data), // Handle different API structures
+        email: registerData.email 
+      },
+      expiresAt: expirationDate.toISOString()
+    };
+
+    localStorage.setItem("userData", JSON.stringify(userData));
+    toast.success("Registration successful!");
+
+    setIsLoggedIn(true);
+    setUser(userData.user);
+    closeModal();
+    setRegisterData({
+      name: "",
+      email: "",
+      password: "",
+    });
+
+  } catch (error) {
+    // Improved error handling
+    const errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error || 
+                        "Registration failed. Please try again.";
+    toast.error(errorMessage);
+    console.error("Registration error:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const resetForm = () => {
     setLoginData({ email: "", password: "" });
@@ -250,7 +300,7 @@ export const Navbar = () => {
       name: "",
       email: "",
       password: "",
-   
+      confirmPassword: "",
     });
     setErrors({
       login: { email: "", password: "" },
@@ -264,12 +314,10 @@ export const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("email");
+    localStorage.removeItem("userData");
     setIsLoggedIn(false);
     setUser(null);
-    setAnchorEl(null);
-    navigate("/");
+    toast.success("Logged out successfully!");
   };
 
   const handleMenuOpen = (event) => {
