@@ -14,6 +14,9 @@ import { Contact } from "./pages/contacts/Contacts";
 import { Testimony } from "./pages/testimony/Testimony";
 import { Login } from "./pages/login/Login";
 import { FAQ } from "./components/faq/FAQ";
+import { Dashboard } from "./components/dashboard/admin/Dashboard";
+import { UserManagement } from "./components/dashboard/admin/components/user/UserManagement";
+import { SubscriptionManagement } from "./components/dashboard/admin/components/subscription/SubscriptionManagement";
 
 // Private Route component
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -48,6 +51,9 @@ export default function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/839" element={<Dashboard />} />
+        <Route path="/user" element={<UserManagement />} />
+        <Route path="/73282/12102" element={<SubscriptionManagement />} />
         {/* Catch-all route for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>

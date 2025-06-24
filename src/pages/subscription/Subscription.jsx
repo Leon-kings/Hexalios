@@ -36,7 +36,7 @@ export const SubscribeSection = () => {
     try {
       // Replace with your actual API endpoint
       const response = await axios.post(
-        "https://your-api-endpoint.com/subscribe",
+        "https://hexaliosnode.onrender.com/subscriptions",
         formData
       );
 
