@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -12,7 +13,6 @@ import {
   Person as PersonIcon,
   Mail as MailIcon,
   Subject as SubjectIcon,
-  Menu as MenuIcon,
   Dashboard,
   Info as InfoIcon,
   ChevronLeft,
@@ -20,7 +20,7 @@ import {
 } from "@mui/icons-material";
 import { Sidebar } from "../sidebar/Sidebar";
 
-export const ContactManagement = () => {
+export const UserContactManagement = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,6 +32,7 @@ export const ContactManagement = () => {
   const [stats, setStats] = useState({ total: 0, stats: [] });
   const [currentPage, setCurrentPage] = useState(1);
   const [contactsPerPage] = useState(6);
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   // Status colors
   const statusColors = {
@@ -41,8 +42,19 @@ export const ContactManagement = () => {
     spam: "bg-red-100 text-red-800",
   };
 
-  // Fetch contacts and stats
+  // Get logged-in user from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setLoggedInUser(parsedUser);
+    }
+  }, []);
+
+  // Fetch contacts and stats for logged-in user
   const fetchContacts = async () => {
+    if (!loggedInUser?.email) return;
+    
     try {
       setLoading(true);
       const [contactsRes, statsRes] = await Promise.all([
@@ -50,14 +62,22 @@ export const ContactManagement = () => {
         axios.get("https://hexaliosnode.onrender.com/contacts/stats")
       ]);
 
-      setContacts(contactsRes.data.data || []);
-      setStats({
-        total: statsRes.data.data?.totalContacts || 0,
-        stats: statsRes.data.data?.statusCounts || []
-      });
+      // Filter contacts by logged-in user's email
+      const filteredContacts = (contactsRes.data.data || []).filter(
+        contact => contact.email === loggedInUser.email
+      );
+
+      // Filter stats to only show counts for the logged-in user's contacts
+      const filteredStats = {
+        total: filteredContacts.length,
+        stats: (statsRes.data.data?.statusCounts || []).filter(stat => 
+          filteredContacts.some(contact => contact.status === stat._id))
+      };
+
+      setContacts(filteredContacts);
+      setStats(filteredStats);
     } catch (err) {
-      toast.error("Failed to fetch data");
-      console.error("Fetch error:", err);
+      toast.error("Failed to fetch data",err);
       setContacts([]);
       setStats({ total: 0, stats: [] });
     } finally {
@@ -67,7 +87,7 @@ export const ContactManagement = () => {
 
   useEffect(() => {
     fetchContacts();
-  }, []);
+  }, [loggedInUser?.email]);
 
   // Pagination
   const indexOfLastContact = currentPage * contactsPerPage;
@@ -79,14 +99,16 @@ export const ContactManagement = () => {
   const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
-  // Handle search
+  // Handle search - only searches within logged-in user's contacts
   const handleSearch = async () => {
+    if (!loggedInUser?.email) return;
+    
     if (!searchTerm.trim()) return fetchContacts();
 
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://hexaliosnode.onrender.com/contacts/search?term=${searchTerm}`
+        `https://hexaliosnode.onrender.com/contacts/search?term=${searchTerm}&email=${loggedInUser.email}`
       );
       
       const results = response.data.data?.contacts || [];
@@ -94,33 +116,40 @@ export const ContactManagement = () => {
       setCurrentPage(1);
       toast.info(results.length ? "Contacts found" : "No contacts found");
     } catch (err) {
-      toast.error("Search failed");
-      console.error("Search error:", err);
+      toast.error("Search failed",err);
       setContacts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle create
+  // Handle create - ensures new contact has logged-in user's email
   const handleCreate = async () => {
     try {
+      const contactToCreate = {
+        ...currentContact,
+        email: loggedInUser.email
+      };
+      
       await axios.post(
         "https://hexaliosnode.onrender.com/contacts",
-        currentContact
+        contactToCreate
       );
       toast.success("Contact created successfully");
       fetchContacts();
       setShowModal(false);
     } catch (err) {
-      toast.error("Failed to create contact");
-      console.error("Create error:", err);
+      toast.error("Failed to create contact",err);
     }
   };
 
-  // Handle update
+  // Handle update - verifies contact belongs to logged-in user
   const handleUpdate = async () => {
     try {
+      if (currentContact.email !== loggedInUser.email) {
+        throw new Error("Cannot update other users' contacts");
+      }
+      
       await axios.put(
         `https://hexaliosnode.onrender.com/contacts/${currentContact._id}`,
         currentContact
@@ -129,8 +158,7 @@ export const ContactManagement = () => {
       fetchContacts();
       setShowModal(false);
     } catch (err) {
-      toast.error("Failed to update contact");
-      console.error("Update error:", err);
+      toast.error(err.message || "Failed to update contact");
     }
   };
 
@@ -146,8 +174,7 @@ export const ContactManagement = () => {
         setCurrentPage(currentPage - 1);
       }
     } catch (err) {
-      toast.error("Failed to delete contact");
-      console.error("Delete error:", err);
+      toast.error("Failed to delete contact",err);
     } finally {
       setShowDeleteModal(false);
     }
@@ -157,7 +184,7 @@ export const ContactManagement = () => {
   const openCreateModal = () => {
     setCurrentContact({
       name: "",
-      email: "",
+      email: loggedInUser?.email || "",
       subject: "",
       message: "",
       status: "pending"
@@ -166,8 +193,13 @@ export const ContactManagement = () => {
   };
 
   const openEditModal = (contact) => {
-    setCurrentContact({ ...contact });
-    setShowModal(true);
+    // Only allow editing if email matches logged-in user
+    if (contact.email === loggedInUser?.email) {
+      setCurrentContact({ ...contact });
+      setShowModal(true);
+    } else {
+      toast.error("You can only edit your own contacts");
+    }
   };
 
   const openDeleteConfirmation = (id) => {
@@ -180,6 +212,8 @@ export const ContactManagement = () => {
     setCurrentContact(prev => ({ ...prev, [name]: value }));
   };
 
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   return (
     <div className="flex w-full min-h-screen rounded-2xl mt-4 mb-2 text-black overflow-hidden bg-gray-100 relative">
       <Sidebar isOpen={sidebarOpen} />
@@ -187,6 +221,13 @@ export const ContactManagement = () => {
       <div className="flex-1 overflow-auto bg-gray-500 rounded-2xl transition-all duration-300">
         <div className="p-4 md:p-6">
           <ToastContainer position="top-right" autoClose={3000} />
+
+          {/* Current User Display */}
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <p className="text-sm font-medium text-blue-800">
+              Viewing contacts for: <span className="font-bold">{loggedInUser?.email || "Not logged in"}</span>
+            </p>
+          </div>
 
           {/* Header and Search */}
           <div className="flex flex-col md:flex-row p-4 bg-gray-400 justify-between items-center mb-6 gap-4">
@@ -196,7 +237,7 @@ export const ContactManagement = () => {
               </h2>
             </div>
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={toggleSidebar}
               className="fixed md:hidden z-50 top-28 left-4 p-2 rounded-lg bg-gray-200 text-gray-800 shadow-md"
             >
               <Dashboard className="text-blue-400" />
@@ -205,7 +246,7 @@ export const ContactManagement = () => {
               <div className="relative flex-grow">
                 <input
                   type="text"
-                  placeholder="Search contacts..."
+                  placeholder="Search your contacts..."
                   className="w-full pl-10 pr-4 py-2 border bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -222,6 +263,7 @@ export const ContactManagement = () => {
               <button
                 onClick={openCreateModal}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                disabled={!loggedInUser}
               >
                 <AddIcon /> Add Contact
               </button>
@@ -233,7 +275,7 @@ export const ContactManagement = () => {
             <div className="bg-white rounded-lg shadow p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Contacts</p>
+                  <p className="text-sm font-medium text-gray-500">Your Contacts</p>
                   <p className="text-2xl font-bold">{stats.total}</p>
                 </div>
                 <div className="p-3 rounded-full bg-blue-100 text-blue-600">
@@ -262,6 +304,10 @@ export const ContactManagement = () => {
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : !loggedInUser ? (
+              <div className="col-span-full px-6 py-4 text-center text-gray-500">
+                Please log in to view contacts
               </div>
             ) : currentContacts.length > 0 ? (
               currentContacts.map((contact) => (
@@ -321,7 +367,7 @@ export const ContactManagement = () => {
               ))
             ) : (
               <div className="col-span-full px-6 py-4 text-center text-gray-500">
-                No contacts found
+                No contacts found for your account
               </div>
             )}
           </div>
@@ -387,11 +433,9 @@ export const ContactManagement = () => {
                     </label>
                     <input
                       type="email"
-                      name="email"
-                      value={currentContact.email}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
+                      value={loggedInUser?.email || ''}
+                      className="w-full px-3 py-2 border rounded-md bg-gray-100"
+                      disabled
                     />
                   </div>
 

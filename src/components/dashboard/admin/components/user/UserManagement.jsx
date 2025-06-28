@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -25,6 +26,7 @@ export const UserManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [userIdToDelete, setUserIdToDelete] = useState(null);
+  const [userCounter, setUserCounter] = useState(0); // Added counter for users
 
   // Fetch users
   const fetchUsers = async () => {
@@ -36,6 +38,14 @@ export const UserManagement = () => {
       console.log(response.data.data.users);
       const userdata = response.data.data.users;
       setUsers(Array.isArray(userdata) ? response.data.data.users : []);
+      
+      // Check if we need to open a new page
+      if (userCounter >= 10) {
+        window.open(window.location.href, '_blank');
+        setUserCounter(0); // Reset counter after opening new page
+      } else {
+        setUserCounter(prev => prev + (Array.isArray(userdata) ? userdata.length : 0));
+      }
     } catch (err) {
       setUsers([]);
       toast.error("Failed to fetch users", err);

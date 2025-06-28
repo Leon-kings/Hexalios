@@ -208,40 +208,67 @@ export const Navbar = () => {
     }
   }, []);
 
-  const handleLogin = async () => {
-    if (!validateForm("login")) return;
+const handleLogin = async () => {
+  if (!validateForm("login")) return;
 
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${API_URL}/login`, loginData);
+  setIsLoading(true);
+  try {
+    const response = await axios.post(`${API_URL}/login`, loginData);
+    console.log("API Response:", response.data); // For debugging
 
-      // Calculate expiration date (current time + 2 days)
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 2);
-
-      // Store all user data and expiration in localStorage
-      const userData = {
-        token: response.data.token,
-        email: loginData.email,
-        user: { ...response.data.user, email: loginData.email },
-        expiresAt: expirationDate.toISOString(),
-      };
-
-      localStorage.setItem("userData", JSON.stringify(userData));
-      toast.success("Login successful!");
-
-      setIsLoggedIn(true);
-      setUser(userData.user);
-      closeModal();
-      setLoginData({ email: "", password: "" });
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Login failed. Please try again."
-      );
-    } finally {
-      setIsLoading(false);
+    // 1. Check if response is successful
+    if (!response.data || response.data.status !== "success") {
+      throw new Error(response.data?.message || "Login failed: Invalid server response");
     }
-  };
+
+    // 2. Verify token exists
+    if (!response.data.token) {
+      throw new Error("Authentication failed: No token received");
+    }
+
+    // 3. Verify user data exists
+    if (!response.data.data?.user) {
+      throw new Error("User data not found in response");
+    }
+
+    const loggedInUser = response.data.data.user;
+
+    // 4. Prepare user data for storage (2 days expiration)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 2);
+
+    const userData = {
+      token: response.data.token,
+      email: loggedInUser.email,
+      user: loggedInUser,
+      expiresAt: expirationDate.toISOString(),
+    };
+
+    // 5. Store data and update state
+    localStorage.setItem("userData", JSON.stringify(userData));
+    setIsLoggedIn(true);
+    setUser(userData.user);
+
+    // 6. Navigate based on status
+    const redirectPath = loggedInUser.status === 'admin' ? '/83992' : '/83934/3281';
+    navigate(redirectPath);
+
+    // 7. UI updates
+    toast.success(`Welcome back, ${loggedInUser.name}!`);
+    closeModal();
+    setLoginData({ email: "", password: "" });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    toast.error(
+      error.response?.data?.message || 
+      error.message || 
+      "Login failed. Please check your credentials and try again."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
 
 const handleRegister = async () => {
   if (!validateForm("register")) return;

@@ -4,18 +4,28 @@ import { motion } from 'framer-motion';
 import { Close, Visibility, VisibilityOff, Lock, Email, Person } from '@mui/icons-material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 export const Login = () => {
   const [authMode, setAuthMode] = useState('login');
+   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+    const openModal = () => setOpenAuthModal(true);
+  const closeModal = () => setOpenAuthModal(false);
+  // 
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
 
   const [loginData, setLoginData] = useState({
     email: '',
     password: '',
   });
-
+const API_URL = "https://hexaliosnode.onrender.com/auth";
   const [registerData, setRegisterData] = useState({
     name: '',
     email: '',
@@ -27,6 +37,57 @@ export const Login = () => {
     login: {},
     register: {},
   });
+    const validateForm = (mode) => {
+    let valid = true;
+    const newErrors = {
+      login: { email: "", password: "" },
+      register: { name: "", email: "", password: "", confirmPassword: "" },
+    };
+
+    if (mode === "login") {
+      if (!loginData.email) {
+        newErrors.login.email = "Email is required";
+        valid = false;
+      } else if (!/\S+@\S+\.\S+/.test(loginData.email)) {
+        newErrors.login.email = "Email is invalid";
+        valid = false;
+      }
+
+      if (!loginData.password) {
+        newErrors.login.password = "Password is required";
+        valid = false;
+      }
+    } else {
+      if (!registerData.name) {
+        newErrors.register.name = "Name is required";
+        valid = false;
+      }
+
+      if (!registerData.email) {
+        newErrors.register.email = "Email is required";
+        valid = false;
+      } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
+        newErrors.register.email = "Email is invalid";
+        valid = false;
+      }
+
+      if (!registerData.password) {
+        newErrors.register.password = "Password is required";
+        valid = false;
+      } else if (registerData.password.length < 6) {
+        newErrors.register.password = "Password must be at least 6 characters";
+        valid = false;
+      }
+
+      if (registerData.password !== registerData.confirmPassword) {
+        newErrors.register.confirmPassword = "Passwords don't match";
+        valid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
 
   const validateLogin = () => {
     const newErrors = {};
@@ -47,25 +108,74 @@ export const Login = () => {
     return newErrors;
   };
 
-  const handleLogin = async () => {
-    const validationErrors = validateLogin();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors({ ...errors, login: validationErrors });
-      return;
+const handleLogin = async () => {
+  if (!validateForm("login")) return;
+
+  setIsLoading(true);
+  try {
+    console.log("Attempting login with:", loginData);
+    const response = await axios.post(`${API_URL}/login`, loginData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    console.log("API Response:", response.data);
+
+    if (!response.data || response.data.status !== "success") {
+      throw new Error(response.data?.message || "Login failed: Invalid server response");
     }
 
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Login successful!');
-      // Redirect or handle successful login here
-    } catch (error) {
-      toast.error('Invalid credentials. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (!response.data.token) {
+      console.error("No token received in response:", response.data);
+      throw new Error("Authentication failed: No token received");
     }
-  };
+
+    if (!response.data.data?.user) {
+      throw new Error("User data not found in response");
+    }
+
+    const loggedInUser = response.data.data.user;
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 2);
+
+    const userData = {
+      token: response.data.token,
+      email: loggedInUser.email,
+      user: loggedInUser,
+      expiresAt: expirationDate.toISOString(),
+    };
+
+    localStorage.setItem("userData", JSON.stringify(userData));
+    console.log("Stored userData:", localStorage.getItem("userData"));
+    
+    setIsLoggedIn(true);
+    setUser(userData.user);
+
+    const redirectPath = loggedInUser.status === 'admin' ? '/83992' : '/83934/3281';
+    console.log("Navigating to:", redirectPath);
+    navigate(redirectPath);
+
+    toast.success(`Welcome back, ${loggedInUser.name}!`);
+    closeModal();
+    setLoginData({ email: "", password: "" });
+
+  } catch (error) {
+    console.error("Login error details:", {
+      message: error.message,
+      response: error.response,
+      stack: error.stack
+    });
+    toast.error(
+      error.response?.data?.message || 
+      error.message || 
+      "Login failed. Please check your credentials and try again."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleRegister = async () => {
     const validationErrors = validateRegister();

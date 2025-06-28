@@ -67,7 +67,7 @@ export const Sidebar = ({ isOpen, toggleSidebar }) => {
         <div className="flex flex-col h-full p-4 border-r border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-8 p-2">
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-              Admin Panel
+              User Panel
             </h1>
           </div>
 

@@ -9,71 +9,74 @@ import {
   Add as AddIcon,
   Check as CheckIcon,
   Close as CloseIcon,
-  Person as PersonIcon,
-  Mail as MailIcon,
-  Subject as SubjectIcon,
-  Menu as MenuIcon,
+  CalendarToday as CalendarIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
   Dashboard,
-  Info as InfoIcon,
   ChevronLeft,
   ChevronRight,
 } from "@mui/icons-material";
 import { Sidebar } from "../sidebar/Sidebar";
 
-export const ContactManagement = () => {
-  const [contacts, setContacts] = useState([]);
+export const BookingManagement = () => {
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [currentContact, setCurrentContact] = useState(null);
-  const [contactToDelete, setContactToDelete] = useState(null);
-  const [stats, setStats] = useState({ total: 0, stats: [] });
+  const [currentBooking, setCurrentBooking] = useState(null);
+  const [bookingToDelete, setBookingToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [contactsPerPage] = useState(6);
+  const [bookingsPerPage] = useState(6);
 
   // Status colors
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800",
-    "in-progress": "bg-blue-100 text-blue-800",
-    resolved: "bg-green-100 text-green-800",
-    spam: "bg-red-100 text-red-800",
+    confirmed: "bg-blue-100 text-blue-800",
+    cancelled: "bg-red-100 text-red-800",
+    completed: "bg-green-100 text-green-800",
   };
 
-  // Fetch contacts and stats
-  const fetchContacts = async () => {
+  // Safely get nested properties
+  const getSafe = (obj, path, defaultValue = "") => {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue;
+  };
+
+  // Fetch bookings
+  const fetchBookings = async () => {
     try {
       setLoading(true);
-      const [contactsRes, statsRes] = await Promise.all([
-        axios.get("https://hexaliosnode.onrender.com/contacts"),
-        axios.get("https://hexaliosnode.onrender.com/contacts/stats")
-      ]);
-
-      setContacts(contactsRes.data.data || []);
-      setStats({
-        total: statsRes.data.data?.totalContacts || 0,
-        stats: statsRes.data.data?.statusCounts || []
-      });
+      const response = await axios.get("https://hexaliosnode.onrender.com/bookings");
+      
+      // Safely handle response data with multiple fallbacks
+      const bookingsData = response.data?.data?.bookings || 
+                         response.data?.bookings || 
+                         (Array.isArray(response.data) ? response.data : []);
+      
+      setBookings(bookingsData);
     } catch (err) {
-      toast.error("Failed to fetch data");
-      console.error("Fetch error:", err);
-      setContacts([]);
-      setStats({ total: 0, stats: [] });
+      console.error("Fetch error:", {
+        message: err.message,
+        response: err.response?.data,
+        config: err.config
+      });
+      toast.error("Failed to fetch bookings");
+      setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchContacts();
+    fetchBookings();
   }, []);
 
   // Pagination
-  const indexOfLastContact = currentPage * contactsPerPage;
-  const indexOfFirstContact = indexOfLastContact - contactsPerPage;
-  const currentContacts = contacts.slice(indexOfFirstContact, indexOfLastContact);
-  const totalPages = Math.ceil(contacts.length / contactsPerPage);
+  const indexOfLastBooking = currentPage * bookingsPerPage;
+  const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
+  const currentBookings = bookings.slice(indexOfFirstBooking, indexOfLastBooking);
+  const totalPages = Math.ceil(bookings.length / bookingsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
@@ -81,22 +84,23 @@ export const ContactManagement = () => {
 
   // Handle search
   const handleSearch = async () => {
-    if (!searchTerm.trim()) return fetchContacts();
+    if (!searchTerm.trim()) return fetchBookings();
 
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://hexaliosnode.onrender.com/contacts/search?term=${searchTerm}`
+        `https://hexaliosnode.onrender.com/bookings/search?term=${searchTerm}`
       );
       
-      const results = response.data.data?.contacts || [];
-      setContacts(results);
+      const results = response.data?.data?.bookings || 
+                     response.data?.bookings || 
+                     [];
+      setBookings(results);
       setCurrentPage(1);
-      toast.info(results.length ? "Contacts found" : "No contacts found");
     } catch (err) {
-      toast.error("Search failed");
       console.error("Search error:", err);
-      setContacts([]);
+      toast.error("Search failed");
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -106,15 +110,15 @@ export const ContactManagement = () => {
   const handleCreate = async () => {
     try {
       await axios.post(
-        "https://hexaliosnode.onrender.com/contacts",
-        currentContact
+        "https://hexaliosnode.onrender.com/bookings",
+        currentBooking
       );
-      toast.success("Contact created successfully");
-      fetchContacts();
+      toast.success("Booking created successfully");
+      fetchBookings();
       setShowModal(false);
     } catch (err) {
-      toast.error("Failed to create contact");
       console.error("Create error:", err);
+      toast.error("Failed to create booking");
     }
   };
 
@@ -122,15 +126,15 @@ export const ContactManagement = () => {
   const handleUpdate = async () => {
     try {
       await axios.put(
-        `https://hexaliosnode.onrender.com/contacts/${currentContact._id}`,
-        currentContact
+        `https://hexaliosnode.onrender.com/bookings/${currentBooking._id}`,
+        currentBooking
       );
-      toast.success("Contact updated successfully");
-      fetchContacts();
+      toast.success("Booking updated successfully");
+      fetchBookings();
       setShowModal(false);
     } catch (err) {
-      toast.error("Failed to update contact");
       console.error("Update error:", err);
+      toast.error("Failed to update booking");
     }
   };
 
@@ -138,16 +142,16 @@ export const ContactManagement = () => {
   const handleDelete = async () => {
     try {
       await axios.delete(
-        `https://hexaliosnode.onrender.com/contacts/${contactToDelete}`
+        `https://hexaliosnode.onrender.com/bookings/${bookingToDelete}`
       );
-      toast.success("Contact deleted successfully");
-      fetchContacts();
-      if (currentContacts.length === 1 && currentPage > 1) {
+      toast.success("Booking deleted successfully");
+      fetchBookings();
+      if (currentBookings.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       }
     } catch (err) {
-      toast.error("Failed to delete contact");
       console.error("Delete error:", err);
+      toast.error("Failed to delete booking");
     } finally {
       setShowDeleteModal(false);
     }
@@ -155,34 +159,57 @@ export const ContactManagement = () => {
 
   // Modal handlers
   const openCreateModal = () => {
-    setCurrentContact({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-      status: "pending"
+    setCurrentBooking({
+      _id: null,
+      service: {
+        title: "",
+        duration: 30,
+      },
+      customer: {
+        name: "",
+        email: "",
+        phone: "",
+      },
+      bookingDetails: {
+        preferredDate: new Date().toISOString().slice(0, 16),
+        notes: "",
+        status: "pending",
+      },
     });
     setShowModal(true);
   };
 
-  const openEditModal = (contact) => {
-    setCurrentContact({ ...contact });
+  const openEditModal = (booking) => {
+    setCurrentBooking({ 
+      ...booking,
+      bookingDetails: {
+        ...booking.bookingDetails,
+        preferredDate: booking.bookingDetails?.preferredDate 
+          ? new Date(booking.bookingDetails.preferredDate).toISOString().slice(0, 16)
+          : new Date().toISOString().slice(0, 16)
+      }
+    });
     setShowModal(true);
   };
 
   const openDeleteConfirmation = (id) => {
-    setContactToDelete(id);
+    setBookingToDelete(id);
     setShowDeleteModal(true);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentContact(prev => ({ ...prev, [name]: value }));
+  const handleNestedInputChange = (parent, field, value) => {
+    setCurrentBooking(prev => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent],
+        [field]: value,
+      },
+    }));
   };
 
   return (
     <div className="flex w-full min-h-screen rounded-2xl mt-4 mb-2 text-black overflow-hidden bg-gray-100 relative">
-      <Sidebar isOpen={sidebarOpen} />
+      <Sidebar isOpen={sidebarOpen}  />
 
       <div className="flex-1 overflow-auto bg-gray-500 rounded-2xl transition-all duration-300">
         <div className="p-4 md:p-6">
@@ -192,7 +219,7 @@ export const ContactManagement = () => {
           <div className="flex flex-col md:flex-row p-4 bg-gray-400 justify-between items-center mb-6 gap-4">
             <div className="flex items-center p-4">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <MailIcon /> Contact Management
+                <CalendarIcon /> Booking Management
               </h2>
             </div>
             <button
@@ -205,7 +232,7 @@ export const ContactManagement = () => {
               <div className="relative flex-grow">
                 <input
                   type="text"
-                  placeholder="Search contacts..."
+                  placeholder="Search bookings..."
                   className="w-full pl-10 pr-4 py-2 border bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -223,76 +250,47 @@ export const ContactManagement = () => {
                 onClick={openCreateModal}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
               >
-                <AddIcon /> Add Contact
+                <AddIcon /> New Booking
               </button>
             </div>
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Total Contacts</p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
-                <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                  <MailIcon />
-                </div>
-              </div>
-            </div>
-            
-            {stats.stats.map((stat) => (
-              <div key={stat._id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 capitalize">{stat._id}</p>
-                    <p className="text-2xl font-bold">{stat.count}</p>
-                  </div>
-                  <div className={`p-3 rounded-full ${statusColors[stat._id] || 'bg-gray-100 text-gray-800'}`}>
-                    <InfoIcon />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Contact List */}
+          {/* Booking List */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
             {loading ? (
               <div className="col-span-full flex justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
               </div>
-            ) : currentContacts.length > 0 ? (
-              currentContacts.map((contact) => (
+            ) : currentBookings.length > 0 ? (
+              currentBookings.map((booking) => (
                 <div
-                  key={contact._id}
+                  key={booking._id || Math.random().toString(36).substr(2, 9)}
                   className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow flex flex-col"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        {contact.name}
+                        {getSafe(booking, 'customer.name', 'No name')}
                       </h3>
-                      <p className="text-sm text-gray-600 flex items-center truncate">
-                        <MailIcon className="mr-1" size="small" />
-                        {contact.email}
-                      </p>
-                      <p className="text-sm text-gray-600 flex items-center mt-1 truncate">
-                        <SubjectIcon className="mr-1" size="small" />
-                        {contact.subject}
-                      </p>
+                      <div className="flex items-center text-sm text-gray-600 truncate">
+                        <EmailIcon className="mr-1" size="small" />
+                        {getSafe(booking, 'customer.email', 'No email')}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 truncate">
+                        <PhoneIcon className="mr-1" size="small" />
+                        {getSafe(booking, 'customer.phone', 'No phone')}
+                      </div>
                     </div>
                     <div className="flex gap-2 ml-2">
                       <button
-                        onClick={() => openEditModal(contact)}
+                        onClick={() => openEditModal(booking)}
                         className="text-blue-600 hover:text-blue-900"
                         title="Edit"
                       >
                         <EditIcon />
                       </button>
                       <button
-                        onClick={() => openDeleteConfirmation(contact._id)}
+                        onClick={() => openDeleteConfirmation(booking._id)}
                         className="text-red-600 hover:text-red-900"
                         title="Delete"
                       >
@@ -302,32 +300,43 @@ export const ContactManagement = () => {
                   </div>
 
                   <div className="mt-4 flex-1">
-                    <p className="text-sm text-gray-700 line-clamp-3">
-                      {contact.message}
+                    <div className="text-sm font-medium text-gray-900">
+                      {getSafe(booking, 'service.title', 'No service title')}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {booking.bookingDetails?.preferredDate
+                        ? new Date(booking.bookingDetails.preferredDate).toLocaleString()
+                        : 'No date set'}
+                    </div>
+                    <p className="text-sm text-gray-700 line-clamp-2 mt-2">
+                      {getSafe(booking, 'bookingDetails.notes', 'No notes')}
                     </p>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2 items-center justify-between">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[contact.status] || 'bg-gray-100 text-gray-800'}`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        statusColors[getSafe(booking, 'bookingDetails.status', 'pending')] || 
+                        'bg-gray-100 text-gray-800'
+                      }`}
                     >
-                      {contact.status}
+                      {getSafe(booking, 'bookingDetails.status', 'pending')}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {new Date(contact.createdAt).toLocaleString()}
+                      {getSafe(booking, 'service.duration', '0')} mins
                     </span>
                   </div>
                 </div>
               ))
             ) : (
               <div className="col-span-full px-6 py-4 text-center text-gray-500">
-                No contacts found
+                No bookings found
               </div>
             )}
           </div>
 
           {/* Pagination */}
-          {contacts.length > contactsPerPage && (
+          {bookings.length > bookingsPerPage && (
             <div className="flex justify-center mt-6">
               <nav className="inline-flex rounded-md shadow">
                 <button
@@ -358,24 +367,29 @@ export const ContactManagement = () => {
           )}
 
           {/* Create/Edit Modal */}
-          {showModal && currentContact && (
+          {showModal && currentBooking && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="p-4 border-b">
                   <h2 className="text-xl font-semibold">
-                    {currentContact._id ? "Edit Contact" : "Add New Contact"}
+                    {currentBooking._id ? "Edit Booking" : "Create New Booking"}
                   </h2>
                 </div>
                 <div className="p-4 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name *
+                      Service Title *
                     </label>
                     <input
                       type="text"
-                      name="name"
-                      value={currentContact.name}
-                      onChange={handleInputChange}
+                      value={currentBooking.service?.title || ''}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "service",
+                          "title",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
@@ -383,13 +397,56 @@ export const ContactManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email *
+                      Service Duration (minutes) *
+                    </label>
+                    <input
+                      type="number"
+                      value={currentBooking.service?.duration || 30}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "service",
+                          "duration",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Customer Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={currentBooking.customer?.name || ''}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "customer",
+                          "name",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Customer Email *
                     </label>
                     <input
                       type="email"
-                      name="email"
-                      value={currentContact.email}
-                      onChange={handleInputChange}
+                      value={currentBooking.customer?.email || ''}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "customer",
+                          "email",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
@@ -397,13 +454,18 @@ export const ContactManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject *
+                      Customer Phone *
                     </label>
                     <input
-                      type="text"
-                      name="subject"
-                      value={currentContact.subject}
-                      onChange={handleInputChange}
+                      type="tel"
+                      value={currentBooking.customer?.phone || ''}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "customer",
+                          "phone",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
@@ -411,14 +473,19 @@ export const ContactManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Message *
+                      Preferred Date & Time *
                     </label>
-                    <textarea
-                      name="message"
-                      value={currentContact.message}
-                      onChange={handleInputChange}
+                    <input
+                      type="datetime-local"
+                      value={currentBooking.bookingDetails?.preferredDate || new Date().toISOString().slice(0, 16)}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "bookingDetails",
+                          "preferredDate",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows="4"
                       required
                     />
                   </div>
@@ -428,17 +495,40 @@ export const ContactManagement = () => {
                       Status *
                     </label>
                     <select
-                      name="status"
-                      value={currentContact.status}
-                      onChange={handleInputChange}
+                      value={currentBooking.bookingDetails?.status || 'pending'}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "bookingDetails",
+                          "status",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     >
                       <option value="pending">Pending</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="spam">Spam</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="completed">Completed</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Notes
+                    </label>
+                    <textarea
+                      value={currentBooking.bookingDetails?.notes || ''}
+                      onChange={(e) =>
+                        handleNestedInputChange(
+                          "bookingDetails",
+                          "notes",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows="3"
+                    />
                   </div>
                 </div>
                 <div className="p-4 border-t flex justify-end space-x-3">
@@ -449,10 +539,10 @@ export const ContactManagement = () => {
                     <CloseIcon /> Cancel
                   </button>
                   <button
-                    onClick={currentContact._id ? handleUpdate : handleCreate}
+                    onClick={currentBooking._id ? handleUpdate : handleCreate}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                   >
-                    <CheckIcon /> {currentContact._id ? "Update" : "Create"}
+                    <CheckIcon /> {currentBooking._id ? "Update" : "Create"}
                   </button>
                 </div>
               </div>
@@ -469,7 +559,7 @@ export const ContactManagement = () => {
                   </h2>
                 </div>
                 <div className="p-4">
-                  <p>Are you sure you want to delete this contact? This action cannot be undone.</p>
+                  <p>Are you sure you want to delete this booking? This action cannot be undone.</p>
                 </div>
                 <div className="p-4 border-t flex justify-end space-x-3">
                   <button
