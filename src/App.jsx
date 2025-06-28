@@ -108,6 +108,8 @@ import { UserDashManagement } from "./components/dashboard/user/components/user/
 import { UserSubscriptionManagement } from "./components/dashboard/user/components/subscription/UserDashManagement";
 import { UserContactManagement } from "./components/dashboard/user/components/contact/UserContactManagement";
 import { UserOrderManagement } from "./components/dashboard/user/components/order/UserOrderManagement";
+import { UserBookingManagement } from "./components/dashboard/user/components/booking/UserBookingManagement";
+import { UserSettingsPanel } from "./components/dashboard/user/components/settings/UserSettings";
 
 // Private Route component
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -202,13 +204,33 @@ export default function App() {
         
         {/* Protected user dashboard routes */}
         <Route
-          path="/0892"
+          path="/08928"
           element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <UserDashboard />
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/7820/9101"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <UserBookingManagement />
+             </PrivateRoute>
+          }
+        />
+
+
+              <Route
+          path="/90289"
+          element={
+            <PrivateRoute isAuthenticated={isAuthenticated}>
+              <UserSettingsPanel />
+             </PrivateRoute>
+          }
+        />
+
         <Route
           path="/7282/2820"
           element={

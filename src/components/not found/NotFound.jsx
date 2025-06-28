@@ -17,6 +17,7 @@ export const NotFound = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100 flex items-center justify-center p-4 overflow-hidden relative">
       {/* Floating bubbles background */}
       {[...Array(8)].map((_, i) => (
@@ -35,7 +36,7 @@ export const NotFound = () => {
       ))}
 
       {/* Main card */}
-      <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full mx-4 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 z-10">
+      <div className="bg-white p-8 mt-4 mb-2 rounded-2xl shadow-lg max-w-md w-full mx-4 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 z-10">
         <div className="text-center">
           {/* Material Icons */}
           <span className="material-icons-outlined  text-red-500 mb-4 animate-pulse">
@@ -103,5 +104,6 @@ export const NotFound = () => {
         }
       `}</style>
     </div>
+    </>
   );
 };

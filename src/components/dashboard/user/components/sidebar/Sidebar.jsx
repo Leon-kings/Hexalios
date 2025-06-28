@@ -17,12 +17,12 @@ import {
 import { Link } from "react-router-dom";
 
 const sidebarItems = [
-  { name: "Dashboard", icon: <DashboardIcon />, path: "/83992" },
-  { name: "Users", icon: <PeopleIcon />, path: "/72822/98011" },
-  { name: "Contacts", icon: <EmailIcon />, path: "/82922/67289" },
-  { name: "Orders", icon: <ShoppingBagIcon />, path: "/92023/12381" },
-  { name: "Subscription", icon: <Subscriptions />, path: "/73282/12102" },
-  { name: "Bookings", icon: <CalendarIcon />, path: "/67282/28202" },
+  { name: "Dashboard", icon: <DashboardIcon />, path: "/08928" },
+  { name: "Users", icon: <PeopleIcon />, path: "/7282/2820" },
+  { name: "Contacts", icon: <EmailIcon />, path: "/7233/1719" },
+  { name: "Orders", icon: <ShoppingBagIcon />, path: "/0937/8920" },
+  { name: "Subscription", icon: <Subscriptions />, path: "/8292/2982" },
+  { name: "Bookings", icon: <CalendarIcon />, path: "/7820/9101" },
   { name: "Settings", icon: <SettingsIcon />, path: "/92023" },
 ];
 
