@@ -140,9 +140,9 @@ export const Login = () => {
 
       // Redirect based on user status
       if (user.status === "admin") {
-        navigate("/83992"); // Update with your admin dashboard path
+        navigate("/admin-dashboard"); // Admin dashboard path
       } else {
-        navigate("/08928"); // Update with your user dashboard path
+        navigate("/user-dashboard"); // User dashboard path
       }
 
       toast.success(`Welcome back, ${user.name}!`);

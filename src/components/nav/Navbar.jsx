@@ -34,7 +34,6 @@ import "react-toastify/dist/ReactToastify.css";
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  // const [isOpen, setIsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState("login");
@@ -104,10 +103,8 @@ export const Navbar = () => {
       icon: <ContactPage className="size-6 text-white" />,
       requiresAuth: false,
     },
-
     {
-      label: "Settings",
-      path: "/settings",
+      path: "/92023",
       icon: <Settings className="w-5 h-5" />,
       requiresAuth: true,
     },
@@ -198,128 +195,120 @@ export const Navbar = () => {
       const expirationDate = new Date(parsedData.expiresAt);
 
       if (now < expirationDate) {
-        // Still valid, log the user in
         setIsLoggedIn(true);
         setUser(parsedData.user);
       } else {
-        // Expired, clear storage
         localStorage.removeItem("userData");
       }
     }
   }, []);
 
-const handleLogin = async () => {
-  if (!validateForm("login")) return;
+  const handleLogin = async () => {
+    if (!validateForm("login")) return;
 
-  setIsLoading(true);
-  try {
-    const response = await axios.post(`${API_URL}/login`, loginData);
-    console.log("API Response:", response.data); // For debugging
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/login`, loginData);
+      console.log("API Response:", response.data);
 
-    // 1. Check if response is successful
-    if (!response.data || response.data.status !== "success") {
-      throw new Error(response.data?.message || "Login failed: Invalid server response");
+      if (!response.data || response.data.status !== "success") {
+        throw new Error(
+          response.data?.message || "Login failed: Invalid server response"
+        );
+      }
+
+      if (!response.data.token) {
+        throw new Error("Authentication failed: No token received");
+      }
+
+      if (!response.data.data?.user) {
+        throw new Error("User data not found in response");
+      }
+
+      const loggedInUser = response.data.data.user;
+
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 2);
+
+      const userData = {
+        token: response.data.token,
+        email: loggedInUser.email,
+        user: loggedInUser,
+        expiresAt: expirationDate.toISOString(),
+      };
+
+      localStorage.setItem("userData", JSON.stringify(userData));
+      setIsLoggedIn(true);
+      setUser(userData.user);
+
+      const redirectPath =
+        loggedInUser.status === "admin"
+          ? "/83992"
+          : "/08928";
+      navigate(redirectPath);
+
+      toast.success(`Welcome back, ${loggedInUser.name}!`);
+      closeModal();
+      setLoginData({ email: "", password: "" });
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Login failed. Please check your credentials and try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // 2. Verify token exists
-    if (!response.data.token) {
-      throw new Error("Authentication failed: No token received");
+  const handleRegister = async () => {
+    if (!validateForm("register")) return;
+
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/register`, {
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        confirmPassword: registerData.confirmPassword,
+      });
+
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 2);
+
+      const userData = {
+        token: response.data.token || response.data.accessToken,
+        email: registerData.email,
+        user: {
+          ...(response.data.user || response.data),
+          email: registerData.email,
+        },
+        expiresAt: expirationDate.toISOString(),
+      };
+
+      localStorage.setItem("userData", JSON.stringify(userData));
+      toast.success("Registration successful!");
+
+      setIsLoggedIn(true);
+      setUser(userData.user);
+      closeModal();
+      setRegisterData({
+        name: "",
+        email: "",
+        password: "",
+      });
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Registration failed. Please try again.";
+      toast.error(errorMessage);
+      console.error("Registration error:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    // 3. Verify user data exists
-    if (!response.data.data?.user) {
-      throw new Error("User data not found in response");
-    }
-
-    const loggedInUser = response.data.data.user;
-
-    // 4. Prepare user data for storage (2 days expiration)
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 2);
-
-    const userData = {
-      token: response.data.token,
-      email: loggedInUser.email,
-      user: loggedInUser,
-      expiresAt: expirationDate.toISOString(),
-    };
-
-    // 5. Store data and update state
-    localStorage.setItem("userData", JSON.stringify(userData));
-    setIsLoggedIn(true);
-    setUser(userData.user);
-
-    // 6. Navigate based on status
-    const redirectPath = loggedInUser.status === 'admin' ? '/83992' : '/83934/3281';
-    navigate(redirectPath);
-
-    // 7. UI updates
-    toast.success(`Welcome back, ${loggedInUser.name}!`);
-    closeModal();
-    setLoginData({ email: "", password: "" });
-
-  } catch (error) {
-    console.error("Login error:", error);
-    toast.error(
-      error.response?.data?.message || 
-      error.message || 
-      "Login failed. Please check your credentials and try again."
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const handleRegister = async () => {
-  if (!validateForm("register")) return;
-
-  setIsLoading(true);
-  try {
-    const response = await axios.post(`${API_URL}/register`, { // Note /register endpoint
-      name: registerData.name,
-      email: registerData.email,
-      password: registerData.password,
-      confirmPassword:registerData.confirmPassword
-    });
-
-    // Calculate expiration date (current time + 2 days)
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 2);
-
-    // Store all user data
-    const userData = {
-      token: response.data.token || response.data.accessToken, // Handle different API responses
-      email: registerData.email,
-      user: { 
-        ...(response.data.user || response.data), // Handle different API structures
-        email: registerData.email 
-      },
-      expiresAt: expirationDate.toISOString()
-    };
-
-    localStorage.setItem("userData", JSON.stringify(userData));
-    toast.success("Registration successful!");
-
-    setIsLoggedIn(true);
-    setUser(userData.user);
-    closeModal();
-    setRegisterData({
-      name: "",
-      email: "",
-      password: "",
-    });
-
-  } catch (error) {
-    // Improved error handling
-    const errorMessage = error.response?.data?.message || 
-                        error.response?.data?.error || 
-                        "Registration failed. Please try again.";
-    toast.error(errorMessage);
-    console.error("Registration error:", error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const resetForm = () => {
     setLoginData({ email: "", password: "" });
@@ -335,7 +324,6 @@ const handleRegister = async () => {
     });
   };
 
-  // handleRemember
   const handleRemember = () => {
     toast.success("Remember your password because it's good!");
   };
@@ -364,114 +352,147 @@ const handleRegister = async () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  // Helper function to get the correct path based on user status
+  const getNavItemPath = (item) => {
+    if (item.dynamicPath && typeof item.path === "function") {
+      return item.path(user);
+    }
+    return item.path;
+  };
+
   return (
     <>
-      <div className="bg-black rounded-2xl text-white shadow-md w-full">
-        <div className="container mx-auto px-4">
+      <div className="bg-black text-white shadow-md w-full fixed top-0 left-0 z-40">
+        <div className="mx-auto px-4 w-full">
           {/* Desktop Navbar */}
-          <div className="hidden md:flex items-center justify-between py-4">
+          <div className="hidden lg:flex items-center justify-between py-4 w-full">
             <div className="text-xl font-medium">
-              <img src={logo} alt="" className="bg-white p-2 rounded-2xl" />
+              <img
+                src={logo}
+                alt=""
+                className="bg-white p-2 rounded-2xl w-26 h-16 object-contain"
+              />
             </div>
 
             {/* Navigation Items */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 xl:space-x-2">
               {navItems.map((item) => {
                 if (item.requiresAuth && !isLoggedIn) return null;
+                const path = getNavItemPath(item);
                 return (
-                  <Link to={item.path} key={item.label}>
-                    <button className="flex items-center px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+                  <Link to={path} key={item.label}>
+                    <button className="flex items-center px-3 py-2 xl:px-4 rounded hover:bg-blue-700 transition-colors">
                       {item.icon}
-                      <span className="ml-2">{item.label}</span>
+                      <span className="ml-1 lg:ml-2 text-sm lg:text-base">
+                        {item.label}
+                      </span>
                     </button>
                   </Link>
                 );
               })}
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 xl:space-x-2">
               {!isLoggedIn ? (
                 <>
                   <button
-                    className="flex items-center px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="flex items-center px-3 py-2 xl:px-4 rounded hover:bg-blue-700 transition-colors"
                     onClick={() => {
                       setAuthMode("login");
                       openModal();
                       resetForm();
                     }}
                   >
-                    <Login className="w-5 h-5" />
-                    <span className="ml-2">Login</span>
+                    <Login className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span className="ml-1 lg:ml-2 text-sm lg:text-base">
+                      Login
+                    </span>
                   </button>
                   <button
-                    className="flex items-center px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="flex items-center px-3 py-2 xl:px-4 rounded hover:bg-blue-700 transition-colors"
                     onClick={() => {
                       setAuthMode("register");
                       openModal();
                       resetForm();
                     }}
                   >
-                    <PersonAdd className="w-5 h-5" />
-                    <span className="ml-2">Register</span>
+                    <PersonAdd className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <span className="ml-1 lg:ml-2 text-sm lg:text-base">
+                      Register
+                    </span>
                   </button>
                 </>
               ) : (
-                <div className="relative">
-                  <div className="mr-4 text-sm">
-                    Hello, {user?.name || user?.email || "User"}
-                  </div>
-                  <button
-                    className="p-1 rounded-full hover:bg-blue-700 transition-colors"
-                    onClick={handleMenuOpen}
-                  >
-                    {user?.avatar ? (
-                      <People className="text-blue-500" />
-                    ) : (
-                      <AccountCircle className="w-8 h-8" />
-                    )}
-                  </button>
-
-                  {anchorEl && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg py-1 z-10">
-                      <div
-                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => {
-                          handleMenuClose();
-                          navigate("/profile");
-                        }}
-                      >
-                        <AccountCircle className="w-5 h-5 mr-2" />
-                        <span>Profile</span>
-                      </div>
-                      <div
-                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => {
-                          handleMenuClose();
-                          navigate("/settings");
-                        }}
-                      >
-                        <Settings className="w-5 h-5 mr-2" />
-                        <span>Settings</span>
-                      </div>
-                      <div className="border-t border-gray-200 my-1"></div>
-                      <div
-                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={handleLogout}
-                      >
-                        <Logout className="w-5 h-5 mr-2" />
-                        <span>Logout</span>
-                      </div>
+                <>
+                  <Link to={user?.status === "admin" ? "/83992" : "/08928"}>
+                    <button className="flex items-center px-3 py-2 xl:px-4 rounded hover:bg-blue-700 transition-colors">
+                      <Dashboard className="w-4 h-4 lg:w-5 lg:h-5" />
+                      <span className="ml-1 lg:ml-2 text-sm lg:text-base">
+                        Dashboard
+                      </span>
+                    </button>
+                  </Link>
+                  <div className="relative">
+                    <div className="mr-2 lg:mr-4 text-xs lg:text-sm">
+                      Hello, {user?.name || user?.email || "User"}
                     </div>
-                  )}
-                </div>
+                    <button
+                      className="p-1 rounded-full hover:bg-blue-700 transition-colors"
+                      onClick={handleMenuOpen}
+                    >
+                      {user?.avatar ? (
+                        <People className="text-blue-500 w-6 h-6 lg:w-8 lg:h-8" />
+                      ) : (
+                        <AccountCircle className="w-6 h-6 lg:w-8 lg:h-8" />
+                      )}
+                    </button>
+
+                    {anchorEl && (
+                      <div className="absolute right-0 mt-2 w-40 lg:w-48 bg-white text-gray-800 rounded-md shadow-lg py-1 z-10">
+                        <div
+                          className="flex items-center px-3 lg:px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            handleMenuClose();
+                            navigate("/profile");
+                          }}
+                        >
+                          <AccountCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                          <span className="text-xs lg:text-sm">Profile</span>
+                        </div>
+                        <div
+                          className="flex items-center px-3 lg:px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            handleMenuClose();
+                            navigate("/settings");
+                          }}
+                        >
+                          <Settings className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                          <span className="text-xs lg:text-sm">Settings</span>
+                        </div>
+                        <div className="border-t border-gray-200 my-1"></div>
+                        <div
+                          className="flex items-center px-3 lg:px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={handleLogout}
+                        >
+                          <Logout className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                          <span className="text-xs lg:text-sm">Logout</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </div>
 
-          {/* Mobile Navbar */}
-          <div className="md:hidden flex items-center justify-between py-4">
+          {/* Tablet/Mobile Navbar */}
+          <div className="lg:hidden flex items-center justify-between py-4 w-full">
             <div className="text-xl font-medium">
-              <img src={logo} alt="" className="bg-white p-2 rounded-2xl" />
+              <img
+                src={logo}
+                alt=""
+                className="bg-white p-2 rounded-2xl w-18 h-12 md:w-19 md:h-16 object-contain"
+              />
             </div>
 
             <button
@@ -484,12 +505,13 @@ const handleRegister = async () => {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden bg-blue-700 rounded-lg p-4 mb-4">
+            <div className="lg:hidden bg-blue-700 p-4 w-full">
               <div className="flex flex-col space-y-2">
                 {navItems.map((item) => {
                   if (item.requiresAuth && !isLoggedIn) return null;
+                  const path = getNavItemPath(item);
                   return (
-                    <Link to={item.path} key={item.label}>
+                    <Link to={path} key={item.label}>
                       <button className="w-full flex items-center px-4 py-2 rounded hover:bg-blue-800 transition-colors">
                         {item.icon}
                         <span className="ml-2">{item.label}</span>
@@ -527,6 +549,12 @@ const handleRegister = async () => {
                   </>
                 ) : (
                   <>
+                    <Link to={user?.status === "admin" ? "/83992" : "/08928"}>
+                      <button className="w-full flex items-center px-4 py-2 rounded hover:bg-blue-800 transition-colors">
+                        <Dashboard className="w-5 h-5 text-white" />
+                        <span className="ml-2 text-white">Dashboard</span>
+                      </button>
+                    </Link>
                     <div className="px-4 py-2 text-white text-sm">
                       Hello, {user?.name || user?.email || "User"}
                     </div>
@@ -672,7 +700,6 @@ const handleRegister = async () => {
                           id="remember-me"
                           name="remember-me"
                           type="checkbox"
-                          // onClick={handleRemember}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                         <label
@@ -902,6 +929,8 @@ const handleRegister = async () => {
           </div>
         )}
       </div>
+      {/* Add padding to the main content to account for fixed navbar */}
+      <div className="pt-24"></div>
     </>
   );
 };

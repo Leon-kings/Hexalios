@@ -277,7 +277,7 @@ export const Dashboard = () => {
   const stats = [
     {
       title: "Total Users",
-      value: statsData?.users?.total || "--",
+      value: statsData?.users?.total || "0",
       change: statsData?.users?.change || "+0%",
       icon: <PeopleIcon fontSize="medium" />,
       color: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200",
@@ -294,7 +294,7 @@ export const Dashboard = () => {
     },
     {
       title: "Contacts",
-      value: statsData?.contacts?.total || "--",
+      value: statsData?.contacts?.total || "0",
       change: statsData?.contacts?.change || "+0%",
       icon: <EmailIcon fontSize="medium" />,
       color:
@@ -312,7 +312,7 @@ export const Dashboard = () => {
     },
     {
       title: "Orders",
-      value: statsData?.orders?.total || "--",
+      value: statsData?.orders?.total || "0",
       change: statsData?.orders?.change || "+0%",
       icon: <ShoppingBagIcon fontSize="medium" />,
       color:
@@ -330,7 +330,7 @@ export const Dashboard = () => {
     },
     {
       title: "Payments",
-      value: statsData?.payments?.total || "--",
+      value: statsData?.payments?.total || "0",
       change: statsData?.payments?.change || "+0%",
       icon: <CreditCardIcon fontSize="medium" />,
       color:
@@ -348,7 +348,7 @@ export const Dashboard = () => {
     },
     {
       title: "Bookings",
-      value: statsData?.bookings?.total || "--",
+      value: statsData?.bookings?.total || "0",
       change: statsData?.bookings?.change || "+0%",
       icon: <CalendarIcon fontSize="medium" />,
       color: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-200",
@@ -412,20 +412,14 @@ export const Dashboard = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
+      
       <div className="flex-1 overflow-auto">
         <div className="p-4 md:p-6">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center">
-              <button
-                onClick={toggleSidebar}
-                className="md:hidden mr-4 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
-              >
-                <MenuIcon />
-              </button>
-              <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
                 Dashboard Overview
-              </h1>
+              </h3>
             </div>
             <button
               onClick={handleRefresh}

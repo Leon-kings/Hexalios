@@ -342,6 +342,7 @@ export const SettingsPanel = () => {
                 icon: <NotificationsIcon />,
                 label: "Notifications",
               },
+              
               { id: "profile", icon: <ProfileIcon />, label: "Profile" },
               { id: "security", icon: <LockIcon />, label: "Security" },
             ].map((tab) => (

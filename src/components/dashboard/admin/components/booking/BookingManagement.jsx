@@ -216,7 +216,7 @@ export const BookingManagement = () => {
           <ToastContainer position="top-right" autoClose={3000} />
 
           {/* Header and Search */}
-          <div className="flex flex-col md:flex-row p-4 bg-gray-400 justify-between items-center mb-6 gap-4">
+          <div className="w-full flex flex-col md:flex-row p-4 bg-gray-400 justify-between items-center mb-6 gap-4">
             <div className="flex items-center p-4">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                 <CalendarIcon /> Booking Management
@@ -244,13 +244,13 @@ export const BookingManagement = () => {
                 onClick={handleSearch}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
-                <SearchIcon /> Search
+                <SearchIcon /> 
               </button>
               <button
                 onClick={openCreateModal}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
               >
-                <AddIcon /> New Booking
+                <AddIcon /> 
               </button>
             </div>
           </div>
